@@ -1,10 +1,10 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+/* BridgePay Design System - All colors MUST be HSL */
 
 @layer base {
   :root {
@@ -36,23 +36,29 @@ All colors MUST be HSL.
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* BridgePay Brand Colors */
+    --brand-primary: 158 64% 52%; /* #10B981 - Primary Green */
+    --brand-secondary: 221 83% 53%; /* #3B82F6 - Secondary Blue */
+    --brand-success: 160 84% 39%; /* #059669 - Success Green */
+    --brand-warning: 32 95% 44%; /* #D97706 - Warning Orange */
+    --brand-error: 0 84% 60%; /* #DC2626 - Error Red */
+
+    /* Status Colors */
+    --status-pending: 43 96% 56%; /* #F59E0B - Pending Yellow */
+    --status-completed: 160 84% 39%; /* #059669 - Completed Green */
+    --status-failed: 0 84% 60%; /* #DC2626 - Failed Red */
+    --status-processing: 221 83% 53%; /* #3B82F6 - Processing Blue */
   }
 
   .dark {
@@ -100,6 +106,105 @@ All colors MUST be HSL.
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-inter;
+  }
+}
+
+@layer components {
+  /* BridgePay Button Variants */
+  .btn-primary {
+    @apply bg-brand-primary text-white hover:bg-brand-primary/90 focus:bg-brand-primary/90 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply bg-brand-secondary text-white hover:bg-brand-secondary/90 focus:bg-brand-secondary/90 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98];
+  }
+
+  .btn-outline {
+    @apply border-2 border-brand-primary text-brand-primary bg-transparent hover:bg-brand-primary hover:text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply text-muted-foreground bg-transparent hover:bg-muted hover:text-foreground font-medium px-4 py-2 rounded-lg transition-all duration-200 active:scale-[0.98];
+  }
+
+  /* Status Badges */
+  .status-pending {
+    @apply bg-status-pending/10 text-status-pending border border-status-pending/20 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .status-completed {
+    @apply bg-status-completed/10 text-status-completed border border-status-completed/20 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .status-failed {
+    @apply bg-status-failed/10 text-status-failed border border-status-failed/20 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .status-processing {
+    @apply bg-status-processing/10 text-status-processing border border-status-processing/20 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  /* Card Styles */
+  .card-primary {
+    @apply bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200;
+  }
+
+  .card-interactive {
+    @apply bg-card border border-border rounded-xl shadow-sm hover:shadow-md hover:border-brand-primary/20 transition-all duration-200 cursor-pointer active:scale-[0.99];
+  }
+
+  /* Form Styles */
+  .form-input {
+    @apply w-full px-4 py-3 border border-input rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors duration-200;
+  }
+
+  .form-label {
+    @apply block text-sm font-medium text-foreground mb-2;
+  }
+
+  .form-error {
+    @apply text-brand-error text-sm mt-1;
+  }
+
+  /* Layout Utilities */
+  .container-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+
+  .page-container {
+    @apply min-h-screen bg-background;
+  }
+
+  .mobile-safe-area {
+    @apply pb-20; /* Account for bottom navigation */
+  }
+
+  /* Loading States */
+  .skeleton {
+    @apply bg-muted animate-pulse rounded;
+  }
+
+  /* Responsive Navigation */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50;
+  }
+
+  /* Animations */
+  .animate-fade-in {
+    @apply animate-fade-in;
+  }
+
+  .animate-scale-in {
+    @apply animate-scale-in;
+  }
+
+  /* Hover Effects */
+  .hover-lift {
+    @apply transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .interactive-element {
+    @apply transition-all duration-200 hover:scale-105 active:scale-95;
   }
 }

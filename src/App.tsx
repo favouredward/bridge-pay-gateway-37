@@ -1,12 +1,65 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useAuthStore } from "@/store/authStore";
+
+// Pages
+import LandingPage from "./pages/LandingPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import DashboardPage from "./pages/DashboardPage";
+import SendMoneyPage from "./pages/SendMoneyPage";
+import TransactionHistoryPage from "./pages/TransactionHistoryPage";
+import TransactionDetailsPage from "./pages/TransactionDetailsPage";
+import KYCPage from "./pages/KYCPage";
+import ProfilePage from "./pages/ProfilePage";
+import ReceiptPage from "./pages/ReceiptPage";
+
+// Admin Pages
+import AdminLoginPage from "./pages/admin/AdminLoginPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import AdminTransactionsPage from "./pages/admin/AdminTransactionsPage";
+import AdminKYCPage from "./pages/admin/AdminKYCPage";
+import AdminUsersPage from "./pages/admin/AdminUsersPage";
+import AdminSettingsPage from "./pages/admin/AdminSettingsPage";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
+
+// Protected Route wrapper
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuthStore();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Check if user needs KYC for certain routes
+  const needsKYC = user?.kycStatus !== 'verified';
+  const restrictedPaths = ['/send'];
+  const currentPath = window.location.pathname;
+  
+  if (needsKYC && restrictedPaths.includes(currentPath)) {
+    return <Navigate to="/kyc" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+// Admin Route wrapper
+function AdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, user } = useAuthStore();
+  
+  if (!isAuthenticated || user?.role !== 'admin') {
+    return <Navigate to="/admin/login" replace />;
+  }
+
+  return <>{children}</>;
+}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -15,8 +68,77 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+
+          {/* Protected User Routes */}
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/send" element={
+            <ProtectedRoute>
+              <SendMoneyPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/history" element={
+            <ProtectedRoute>
+              <TransactionHistoryPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/transaction/:id" element={
+            <ProtectedRoute>
+              <TransactionDetailsPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/kyc" element={
+            <ProtectedRoute>
+              <KYCPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          } />
+          <Route path="/receipt/:id" element={
+            <ProtectedRoute>
+              <ReceiptPage />
+            </ProtectedRoute>
+          } />
+
+          {/* Admin Routes */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          <Route path="/admin/dashboard" element={
+            <AdminRoute>
+              <AdminDashboardPage />
+            </AdminRoute>
+          } />
+          <Route path="/admin/transactions" element={
+            <AdminRoute>
+              <AdminTransactionsPage />
+            </AdminRoute>
+          } />
+          <Route path="/admin/kyc" element={
+            <AdminRoute>
+              <AdminKYCPage />
+            </AdminRoute>
+          } />
+          <Route path="/admin/users" element={
+            <AdminRoute>
+              <AdminUsersPage />
+            </AdminRoute>
+          } />
+          <Route path="/admin/settings" element={
+            <AdminRoute>
+              <AdminSettingsPage />
+            </AdminRoute>
+          } />
+
+          {/* Catch all */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
