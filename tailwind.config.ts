@@ -77,6 +77,11 @@ export default {
 					completed: 'hsl(var(--status-completed))',
 					failed: 'hsl(var(--status-failed))',
 					processing: 'hsl(var(--status-processing))',
+				},
+				surface: {
+					primary: 'hsl(var(--surface-primary))',
+					secondary: 'hsl(var(--surface-secondary))',
+					elevated: 'hsl(var(--surface-elevated))',
 				}
 			},
 			fontFamily: {
