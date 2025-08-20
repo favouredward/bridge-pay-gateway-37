@@ -67,6 +67,7 @@ export default {
 				brand: {
 					primary: 'hsl(var(--brand-primary))',
 					secondary: 'hsl(var(--brand-secondary))',
+					accent: 'hsl(var(--brand-accent))',
 					success: 'hsl(var(--brand-success))',
 					warning: 'hsl(var(--brand-warning))',
 					error: 'hsl(var(--brand-error))',
