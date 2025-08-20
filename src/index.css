@@ -252,7 +252,7 @@
   }
 
   .feature-card {
-    @apply group relative overflow-hidden bg-surface-elevated border border-border/50 rounded-3xl p-8 transition-all duration-500 hover:border-brand-primary/30 hover:shadow-2xl hover:shadow-brand-primary/10;
+    @apply relative overflow-hidden bg-surface-elevated border border-border/50 rounded-3xl p-8 transition-all duration-500 hover:border-brand-primary/30 hover:shadow-2xl hover:shadow-brand-primary/10;
   }
 
   /* Loading States */
