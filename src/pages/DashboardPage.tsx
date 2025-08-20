@@ -1,6 +1,6 @@
 
 import { useAuthStore } from '@/store/authStore';
-import { Header } from '@/components/layout/Header';
+import { TopNavigation } from '@/components/layout/TopNavigation';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
 import { ExchangeRateCard } from '@/components/exchange/ExchangeRateCard';
 import { TransactionCard } from '@/components/transactions/TransactionCard';
@@ -9,6 +9,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { mockTransactions } from '@/data/mockData';
 import { Send, History, CreditCard, ArrowUpRight, TrendingUp, DollarSign, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { cn } from '@/lib/utils';
 
 const quickActions = [
   {
@@ -93,6 +95,7 @@ const getKYCStatusConfig = (status: string) => {
 export default function DashboardPage() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Get user's recent transactions
   const userTransactions = mockTransactions
@@ -109,38 +112,41 @@ export default function DashboardPage() {
   const pendingTransactions = userTransactions.filter(tx => tx.status === 'pending').length;
 
   return (
-    <div className="page-container mobile-safe-area">
-      <Header />
+    <div className="min-h-screen bg-background">
+      <TopNavigation />
       
-      <main className="container-padding py-8 space-y-8">
-        {/* Welcome Section */}
+      <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
+        {/* Welcome Section - More compact on mobile */}
         <div className="animate-fade-in">
-          <h1 className="text-3xl font-bold text-foreground mb-2">
-            Welcome back, {user?.firstName}! 👋
+          <h1 className={cn(
+            "font-bold text-foreground mb-2",
+            isMobile ? "text-2xl" : "text-3xl"
+          )}>
+            {isMobile ? `Hi, ${user?.firstName}! 👋` : `Welcome back, ${user?.firstName}! 👋`}
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-muted-foreground text-base md:text-lg">
             Ready to send money around the world?
           </p>
         </div>
 
         {/* KYC Status Alert */}
         {user?.kycStatus !== 'verified' && (
-          <div className={`card-premium p-6 border-l-4 ${kycConfig.borderColor} bg-gradient-to-r ${kycConfig.bgColor} animate-slide-up`}>
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-4">
-                <div className={`p-2 rounded-xl bg-gradient-to-r ${kycConfig.bgColor}`}>
-                  <StatusIcon className={`h-6 w-6 ${kycConfig.textColor}`} />
+          <div className={`card-premium p-4 md:p-6 border-l-4 ${kycConfig.borderColor} bg-gradient-to-r ${kycConfig.bgColor} animate-slide-up`}>
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-start gap-3 md:gap-4 flex-1">
+                <div className={`p-2 rounded-xl bg-gradient-to-r ${kycConfig.bgColor} flex-shrink-0`}>
+                  <StatusIcon className={`h-5 w-5 md:h-6 md:w-6 ${kycConfig.textColor}`} />
                 </div>
-                <div>
-                  <h3 className="font-bold text-foreground text-lg mb-1">{kycConfig.title}</h3>
-                  <p className="text-muted-foreground">{kycConfig.description}</p>
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-bold text-foreground text-base md:text-lg mb-1">{kycConfig.title}</h3>
+                  <p className="text-muted-foreground text-sm md:text-base">{kycConfig.description}</p>
                 </div>
               </div>
               <Button 
                 variant={kycConfig.buttonVariant}
                 size="sm"
                 onClick={() => navigate(kycConfig.href)}
-                className="font-semibold"
+                className="font-semibold flex-shrink-0"
               >
                 {kycConfig.buttonText}
               </Button>
@@ -148,48 +154,48 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up">
+        {/* Stats Overview - Responsive grid */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 animate-slide-up">
           <div className="stat-card">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl">
-                <DollarSign className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+              <div className="p-1.5 md:p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg md:rounded-xl">
+                <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
-              <span className="text-sm text-muted-foreground font-medium">Total Sent</span>
+              <span className="text-xs md:text-sm text-muted-foreground font-medium">Total Sent</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">
+            <p className="text-lg md:text-2xl font-bold text-foreground">
               £{totalAmount.toLocaleString()}
             </p>
           </div>
 
           <div className="stat-card">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl">
-                <CheckCircle2 className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+              <div className="p-1.5 md:p-2 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg md:rounded-xl">
+                <CheckCircle2 className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
-              <span className="text-sm text-muted-foreground font-medium">Completed</span>
+              <span className="text-xs md:text-sm text-muted-foreground font-medium">Completed</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{completedTransactions}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground">{completedTransactions}</p>
           </div>
 
           <div className="stat-card">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl">
-                <Clock className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+              <div className="p-1.5 md:p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg md:rounded-xl">
+                <Clock className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
-              <span className="text-sm text-muted-foreground font-medium">Pending</span>
+              <span className="text-xs md:text-sm text-muted-foreground font-medium">Pending</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{pendingTransactions}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground">{pendingTransactions}</p>
           </div>
 
           <div className="stat-card">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl">
-                <TrendingUp className="h-5 w-5 text-white" />
+            <div className="flex items-center gap-2 md:gap-3 mb-2 md:mb-3">
+              <div className="p-1.5 md:p-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg md:rounded-xl">
+                <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-white" />
               </div>
-              <span className="text-sm text-muted-foreground font-medium">This Month</span>
+              <span className="text-xs md:text-sm text-muted-foreground font-medium">This Month</span>
             </div>
-            <p className="text-2xl font-bold text-foreground">{totalTransactions}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground">{totalTransactions}</p>
           </div>
         </div>
 
@@ -200,29 +206,29 @@ export default function DashboardPage() {
 
         {/* Quick Actions */}
         <div className="animate-slide-up">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Quick Actions</h2>
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">Quick Actions</h2>
             <div className="h-1 flex-1 mx-4 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full opacity-20"></div>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
                 <button
                   key={index}
                   onClick={() => navigate(action.href)}
-                  className={`group card-interactive p-6 text-left space-y-4 bg-gradient-to-br ${action.gradient}/5 hover:${action.gradient}/10 border-2 border-transparent hover:border-current transition-all duration-300`}
+                  className={`group card-interactive p-4 md:p-6 text-left space-y-3 md:space-y-4 bg-gradient-to-br ${action.gradient}/5 hover:${action.gradient}/10 border-2 border-transparent hover:border-current transition-all duration-300`}
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className={`inline-flex p-4 bg-gradient-to-r ${action.gradient} ${action.hoverGradient} rounded-2xl shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
-                    <Icon className="h-7 w-7 text-white" />
+                  <div className={`inline-flex p-3 md:p-4 bg-gradient-to-r ${action.gradient} ${action.hoverGradient} rounded-xl md:rounded-2xl shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
+                    <Icon className="h-6 w-6 md:h-7 md:w-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-foreground text-lg group-hover:text-brand-primary transition-colors">{action.label}</h3>
-                    <p className="text-muted-foreground">{action.description}</p>
+                    <h3 className="font-bold text-foreground text-base md:text-lg group-hover:text-brand-primary transition-colors">{action.label}</h3>
+                    <p className="text-muted-foreground text-sm md:text-base">{action.description}</p>
                   </div>
-                  <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-brand-primary group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
+                  <ArrowUpRight className="h-4 w-4 md:h-5 md:w-5 text-muted-foreground group-hover:text-brand-primary group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
                 </button>
               );
             })}
@@ -231,12 +237,12 @@ export default function DashboardPage() {
 
         {/* Recent Transactions */}
         <div className="animate-slide-up">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-foreground">Recent Transactions</h2>
+          <div className="flex items-center justify-between mb-4 md:mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-foreground">Recent Transactions</h2>
             <Button 
               variant="ghost" 
               onClick={() => navigate('/history')}
-              className="font-semibold hover:bg-brand-primary/10 hover:text-brand-primary"
+              className="font-semibold hover:bg-brand-primary/10 hover:text-brand-primary text-sm"
             >
               View All
               <ArrowUpRight className="ml-1 h-4 w-4" />
@@ -244,7 +250,7 @@ export default function DashboardPage() {
           </div>
 
           {userTransactions.length > 0 ? (
-            <div className="space-y-4">
+            <div className="space-y-3 md:space-y-4">
               {userTransactions.map((transaction, index) => (
                 <div 
                   key={transaction.id} 
@@ -259,7 +265,7 @@ export default function DashboardPage() {
               ))}
             </div>
           ) : (
-            <div className="card-premium p-12">
+            <div className="card-premium p-8 md:p-12">
               <EmptyState
                 icon={History}
                 title="No transactions yet"
@@ -273,38 +279,39 @@ export default function DashboardPage() {
 
         {/* Performance Insights */}
         {userTransactions.length > 0 && (
-          <div className="card-gradient p-8 animate-slide-up">
-            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
-              <TrendingUp className="h-6 w-6 text-brand-secondary" />
+          <div className="card-gradient p-6 md:p-8 animate-slide-up">
+            <h3 className="text-lg md:text-xl font-bold text-foreground mb-4 md:mb-6 flex items-center gap-3">
+              <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-brand-secondary" />
               Your Performance
             </h3>
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold gradient-text mb-2">
+                <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
                   {((completedTransactions / totalTransactions) * 100).toFixed(0)}%
                 </div>
-                <div className="text-muted-foreground font-medium">Success Rate</div>
+                <div className="text-muted-foreground font-medium text-sm md:text-base">Success Rate</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold gradient-text mb-2">
+                <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
                   £{(totalAmount / totalTransactions || 0).toLocaleString()}
                 </div>
-                <div className="text-muted-foreground font-medium">Average Transfer</div>
+                <div className="text-muted-foreground font-medium text-sm md:text-base">Average Transfer</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold gradient-text mb-2">
+                <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
                   {userTransactions.filter(tx => 
                     new Date(tx.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
                   ).length}
                 </div>
-                <div className="text-muted-foreground font-medium">This Month</div>
+                <div className="text-muted-foreground font-medium text-sm md:text-base">This Month</div>
               </div>
             </div>
           </div>
         )}
       </main>
 
-      <BottomNavigation />
+      {/* Only show bottom navigation on mobile */}
+      {isMobile && <BottomNavigation />}
     </div>
   );
 }
