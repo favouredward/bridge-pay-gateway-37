@@ -1,40 +1,40 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* BridgePay Design System - All colors MUST be HSL */
+/* BridgePay Design System - Professional Fintech Theme */
 
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --foreground: 220 13% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 220 13% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 220 13% 18%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 220 13% 18%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 217 32% 96%;
+    --muted-foreground: 215 16% 47%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 217 32% 96%;
+    --accent-foreground: 220 13% 18%;
 
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 217 32% 91%;
+    --input: 217 32% 91%;
+    --ring: 217 91% 60%;
 
     --radius: 0.75rem;
 
@@ -45,58 +45,75 @@
     --sidebar-accent: 240 4.8% 95.9%;
     --sidebar-accent-foreground: 240 5.9% 10%;
     --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-ring: 217 91% 60%;
 
-    /* BridgePay Brand Colors */
-    --brand-primary: 158 64% 52%; /* #10B981 - Primary Green */
-    --brand-secondary: 221 83% 53%; /* #3B82F6 - Secondary Blue */
-    --brand-success: 160 84% 39%; /* #059669 - Success Green */
-    --brand-warning: 32 95% 44%; /* #D97706 - Warning Orange */
-    --brand-error: 0 84% 60%; /* #DC2626 - Error Red */
+    /* BridgePay Professional Brand Colors */
+    --brand-primary: 217 91% 60%; /* #3B82F6 - Premium Blue */
+    --brand-secondary: 158 64% 52%; /* #10B981 - Success Green */
+    --brand-accent: 142 76% 36%; /* #059669 - Deep Green */
+    --brand-success: 160 84% 39%; /* #047857 - Success */
+    --brand-warning: 32 95% 44%; /* #D97706 - Warning */
+    --brand-error: 0 84% 60%; /* #DC2626 - Error */
+
+    /* Gradient Colors */
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(158 64% 52%) 100%);
+    --gradient-secondary: linear-gradient(135deg, hsl(158 64% 52%) 0%, hsl(142 76% 36%) 100%);
+    --gradient-card: linear-gradient(135deg, hsl(217 91% 60% / 0.05) 0%, hsl(158 64% 52% / 0.05) 100%);
 
     /* Status Colors */
-    --status-pending: 43 96% 56%; /* #F59E0B - Pending Yellow */
-    --status-completed: 160 84% 39%; /* #059669 - Completed Green */
-    --status-failed: 0 84% 60%; /* #DC2626 - Failed Red */
-    --status-processing: 221 83% 53%; /* #3B82F6 - Processing Blue */
+    --status-pending: 43 96% 56%; /* #F59E0B */
+    --status-completed: 160 84% 39%; /* #047857 */
+    --status-failed: 0 84% 60%; /* #DC2626 */
+    --status-processing: 217 91% 60%; /* #3B82F6 */
+
+    /* Surface Colors */
+    --surface-primary: 217 33% 97%;
+    --surface-secondary: 158 25% 97%;
+    --surface-elevated: 0 0% 100%;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 220 13% 9%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 220 13% 11%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 220 13% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 220 13% 9%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 19% 15%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217 19% 15%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 217.2 32.6% 17.5%;
+    --accent: 217 19% 15%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 62% 50%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
+    --border: 217 19% 15%;
+    --input: 217 19% 15%;
+    --ring: 217 91% 60%;
+
+    --sidebar-background: 220 13% 9%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 220 13% 9%;
+    --sidebar-accent: 217 19% 15%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-border: 217 19% 15%;
+    --sidebar-ring: 217 91% 60%;
+
+    /* Dark mode adjustments */
+    --surface-primary: 220 13% 11%;
+    --surface-secondary: 217 19% 13%;
+    --surface-elevated: 220 13% 13%;
   }
 }
 
@@ -106,91 +123,103 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
+    @apply bg-background text-foreground font-inter antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
   }
 }
 
 @layer components {
-  /* BridgePay Button Variants */
+  /* Professional Button Variants */
   .btn-primary {
-    @apply bg-brand-primary text-white hover:bg-brand-primary/90 focus:bg-brand-primary/90 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98];
+    @apply bg-gradient-to-r from-brand-primary to-brand-secondary text-white hover:shadow-lg hover:scale-[1.02] focus:scale-[1.02] font-semibold px-8 py-4 rounded-2xl transition-all duration-300 shadow-md active:scale-[0.98] hover:shadow-blue-500/25;
   }
 
   .btn-secondary {
-    @apply bg-brand-secondary text-white hover:bg-brand-secondary/90 focus:bg-brand-secondary/90 font-medium px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98];
+    @apply bg-gradient-to-r from-brand-secondary to-brand-accent text-white hover:shadow-lg hover:scale-[1.02] focus:scale-[1.02] font-semibold px-8 py-4 rounded-2xl transition-all duration-300 shadow-md active:scale-[0.98] hover:shadow-emerald-500/25;
   }
 
   .btn-outline {
-    @apply border-2 border-brand-primary text-brand-primary bg-transparent hover:bg-brand-primary hover:text-white font-medium px-6 py-3 rounded-xl transition-all duration-200 active:scale-[0.98];
+    @apply border-2 border-brand-primary text-brand-primary bg-transparent hover:bg-brand-primary hover:text-white font-semibold px-8 py-4 rounded-2xl transition-all duration-300 active:scale-[0.98] hover:shadow-lg hover:shadow-blue-500/25;
   }
 
   .btn-ghost {
-    @apply text-muted-foreground bg-transparent hover:bg-muted hover:text-foreground font-medium px-4 py-2 rounded-lg transition-all duration-200 active:scale-[0.98];
+    @apply text-muted-foreground bg-transparent hover:bg-muted hover:text-foreground font-medium px-6 py-3 rounded-xl transition-all duration-200 active:scale-[0.98];
   }
 
-  /* Status Badges */
+  /* Professional Status Badges */
   .status-pending {
-    @apply bg-status-pending/10 text-status-pending border border-status-pending/20 px-3 py-1 rounded-full text-sm font-medium;
+    @apply bg-gradient-to-r from-status-pending/10 to-status-pending/5 text-status-pending border border-status-pending/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm;
   }
 
   .status-completed {
-    @apply bg-status-completed/10 text-status-completed border border-status-completed/20 px-3 py-1 rounded-full text-sm font-medium;
+    @apply bg-gradient-to-r from-status-completed/10 to-status-completed/5 text-status-completed border border-status-completed/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm;
   }
 
   .status-failed {
-    @apply bg-status-failed/10 text-status-failed border border-status-failed/20 px-3 py-1 rounded-full text-sm font-medium;
+    @apply bg-gradient-to-r from-status-failed/10 to-status-failed/5 text-status-failed border border-status-failed/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm;
   }
 
   .status-processing {
-    @apply bg-status-processing/10 text-status-processing border border-status-processing/20 px-3 py-1 rounded-full text-sm font-medium;
+    @apply bg-gradient-to-r from-status-processing/10 to-status-processing/5 text-status-processing border border-status-processing/20 px-4 py-2 rounded-full text-sm font-semibold backdrop-blur-sm;
   }
 
-  /* Card Styles */
-  .card-primary {
-    @apply bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200;
+  /* Premium Card Styles */
+  .card-premium {
+    @apply bg-surface-elevated border border-border/50 rounded-3xl shadow-xl shadow-black/5 hover:shadow-2xl hover:shadow-black/10 transition-all duration-500 backdrop-blur-sm;
+  }
+
+  .card-gradient {
+    @apply bg-gradient-to-br from-surface-primary to-surface-secondary border border-border/30 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-500 backdrop-blur-sm;
   }
 
   .card-interactive {
-    @apply bg-card border border-border rounded-xl shadow-sm hover:shadow-md hover:border-brand-primary/20 transition-all duration-200 cursor-pointer active:scale-[0.99];
+    @apply bg-surface-elevated border border-border/50 rounded-3xl shadow-lg hover:shadow-xl hover:border-brand-primary/20 hover:scale-[1.02] transition-all duration-300 cursor-pointer active:scale-[0.99] backdrop-blur-sm;
+  }
+
+  /* Glass Morphism Effects */
+  .glass-card {
+    @apply bg-white/70 dark:bg-black/20 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl;
+  }
+
+  .glass-nav {
+    @apply bg-white/80 dark:bg-black/40 backdrop-blur-2xl border-b border-white/20 supports-[backdrop-filter]:bg-white/60;
   }
 
   /* Form Styles */
   .form-input {
-    @apply w-full px-4 py-3 border border-input rounded-xl bg-background text-foreground placeholder:text-muted-foreground focus:border-brand-primary focus:ring-1 focus:ring-brand-primary transition-colors duration-200;
+    @apply w-full px-6 py-4 border-2 border-input rounded-2xl bg-surface-elevated text-foreground placeholder:text-muted-foreground focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 transition-all duration-200 font-medium;
   }
 
   .form-label {
-    @apply block text-sm font-medium text-foreground mb-2;
+    @apply block text-sm font-semibold text-foreground mb-3;
   }
 
   .form-error {
-    @apply text-brand-error text-sm mt-1;
+    @apply text-brand-error text-sm mt-2 font-medium;
   }
 
   /* Layout Utilities */
   .container-padding {
-    @apply px-4 sm:px-6 lg:px-8;
+    @apply px-6 sm:px-8 lg:px-12;
   }
 
   .page-container {
-    @apply min-h-screen bg-background;
+    @apply min-h-screen bg-gradient-to-br from-surface-primary via-background to-surface-secondary;
   }
 
   .mobile-safe-area {
-    @apply pb-20; /* Account for bottom navigation */
+    @apply pb-24; /* Account for bottom navigation */
   }
 
-  /* Loading States */
-  .skeleton {
-    @apply bg-muted animate-pulse rounded;
-  }
-
-  /* Responsive Navigation */
+  /* Professional Navigation */
   .bottom-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border z-50;
+    @apply fixed bottom-0 left-0 right-0 bg-surface-elevated/95 backdrop-blur-2xl border-t border-border/50 z-50 rounded-t-3xl shadow-2xl;
   }
 
-  /* Animations */
+  /* Advanced Animations */
   .animate-fade-in {
     @apply animate-fade-in;
   }
@@ -199,12 +228,88 @@
     @apply animate-scale-in;
   }
 
+  .animate-slide-up {
+    @apply animate-slide-up;
+  }
+
   /* Hover Effects */
   .hover-lift {
-    @apply transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg;
+    @apply transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl hover:shadow-black/10;
   }
 
   .interactive-element {
-    @apply transition-all duration-200 hover:scale-105 active:scale-95;
+    @apply transition-all duration-300 hover:scale-105 active:scale-95;
   }
+
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent bg-clip-text text-transparent;
+  }
+
+  /* Professional Section Styles */
+  .hero-section {
+    @apply bg-gradient-to-br from-brand-primary/5 via-brand-secondary/5 to-brand-accent/5 relative overflow-hidden;
+  }
+
+  .feature-card {
+    @apply group relative overflow-hidden bg-surface-elevated border border-border/50 rounded-3xl p-8 transition-all duration-500 hover:border-brand-primary/30 hover:shadow-2xl hover:shadow-brand-primary/10;
+  }
+
+  /* Loading States */
+  .skeleton {
+    @apply bg-gradient-to-r from-muted via-muted/50 to-muted animate-pulse rounded-2xl;
+  }
+
+  /* Statistics Cards */
+  .stat-card {
+    @apply bg-gradient-to-br from-surface-elevated to-surface-primary border border-border/30 rounded-3xl p-6 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl;
+  }
+}
+
+/* Custom Keyframes */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.5s ease-out;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Professional Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, hsl(var(--brand-primary)), hsl(var(--brand-secondary)));
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, hsl(var(--brand-primary) / 0.8), hsl(var(--brand-secondary) / 0.8));
 }

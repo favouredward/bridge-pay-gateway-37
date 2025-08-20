@@ -7,32 +7,88 @@ import { TransactionCard } from '@/components/transactions/TransactionCard';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { mockTransactions } from '@/data/mockData';
-import { Send, History, CreditCard, ArrowUpRight } from 'lucide-react';
+import { Send, History, CreditCard, ArrowUpRight, TrendingUp, DollarSign, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const quickActions = [
   {
     icon: Send,
     label: 'Send Money',
-    description: 'Send GBP, receive USDT',
+    description: 'GBP → USDT Transfer',
     href: '/send',
-    color: 'bg-brand-primary',
+    gradient: 'from-blue-500 to-blue-600',
+    hoverGradient: 'hover:from-blue-600 hover:to-blue-700',
   },
   {
     icon: History,
     label: 'Transaction History',
     description: 'View all transactions',
     href: '/history',
-    color: 'bg-brand-secondary',
+    gradient: 'from-emerald-500 to-emerald-600',
+    hoverGradient: 'hover:from-emerald-600 hover:to-emerald-700',
   },
   {
     icon: CreditCard,
     label: 'KYC Verification',
-    description: 'Verify your identity',
+    description: 'Complete verification',
     href: '/kyc',
-    color: 'bg-brand-success',
+    gradient: 'from-purple-500 to-purple-600',
+    hoverGradient: 'hover:from-purple-600 hover:to-purple-700',
   },
 ];
+
+const getKYCStatusConfig = (status: string) => {
+  switch (status) {
+    case 'verified':
+      return {
+        icon: CheckCircle2,
+        title: 'Account Verified',
+        description: 'Your account is fully verified and ready to use',
+        bgColor: 'from-emerald-500/10 to-emerald-600/5',
+        borderColor: 'border-emerald-500/20',
+        textColor: 'text-emerald-600',
+        buttonVariant: 'ghost' as const,
+        buttonText: 'View Profile',
+        href: '/profile',
+      };
+    case 'under_review':
+      return {
+        icon: Clock,
+        title: 'Verification Under Review',
+        description: 'We\'re reviewing your documents. This usually takes 24-48 hours.',
+        bgColor: 'from-blue-500/10 to-blue-600/5',
+        borderColor: 'border-blue-500/20',
+        textColor: 'text-blue-600',
+        buttonVariant: 'ghost' as const,
+        buttonText: 'Check Status',
+        href: '/kyc',
+      };
+    case 'rejected':
+      return {
+        icon: AlertCircle,
+        title: 'Verification Required',
+        description: 'Please resubmit your documents for verification',
+        bgColor: 'from-red-500/10 to-red-600/5',
+        borderColor: 'border-red-500/20',
+        textColor: 'text-red-600',
+        buttonVariant: 'default' as const,
+        buttonText: 'Resubmit Documents',
+        href: '/kyc',
+      };
+    default:
+      return {
+        icon: AlertCircle,
+        title: 'Complete Your Verification',
+        description: 'Verify your identity to start sending money securely',
+        bgColor: 'from-orange-500/10 to-orange-600/5',
+        borderColor: 'border-orange-500/20',
+        textColor: 'text-orange-600',
+        buttonVariant: 'default' as const,
+        buttonText: 'Start Verification',
+        href: '/kyc',
+      };
+  }
+};
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -43,55 +99,130 @@ export default function DashboardPage() {
     .filter(tx => tx.userId === user?.id)
     .slice(0, 3);
 
+  const kycConfig = getKYCStatusConfig(user?.kycStatus || 'pending');
+  const StatusIcon = kycConfig.icon;
+
+  // Calculate user stats
+  const totalTransactions = userTransactions.length;
+  const totalAmount = userTransactions.reduce((sum, tx) => sum + tx.gbpAmount, 0);
+  const completedTransactions = userTransactions.filter(tx => tx.status === 'completed').length;
+  const pendingTransactions = userTransactions.filter(tx => tx.status === 'pending').length;
+
   return (
     <div className="page-container mobile-safe-area">
       <Header />
       
-      <main className="container-padding py-6 space-y-6">
+      <main className="container-padding py-8 space-y-8">
+        {/* Welcome Section */}
+        <div className="animate-fade-in">
+          <h1 className="text-3xl font-bold text-foreground mb-2">
+            Welcome back, {user?.firstName}! 👋
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Ready to send money around the world?
+          </p>
+        </div>
+
         {/* KYC Status Alert */}
         {user?.kycStatus !== 'verified' && (
-          <div className="card-primary p-4 border-l-4 border-l-brand-warning bg-brand-warning/5">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-semibold text-foreground">KYC Verification Required</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Complete your KYC verification to start sending money
-                </p>
+          <div className={`card-premium p-6 border-l-4 ${kycConfig.borderColor} bg-gradient-to-r ${kycConfig.bgColor} animate-slide-up`}>
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-4">
+                <div className={`p-2 rounded-xl bg-gradient-to-r ${kycConfig.bgColor}`}>
+                  <StatusIcon className={`h-6 w-6 ${kycConfig.textColor}`} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-foreground text-lg mb-1">{kycConfig.title}</h3>
+                  <p className="text-muted-foreground">{kycConfig.description}</p>
+                </div>
               </div>
               <Button 
-                variant="outline" 
+                variant={kycConfig.buttonVariant}
                 size="sm"
-                onClick={() => navigate('/kyc')}
+                onClick={() => navigate(kycConfig.href)}
+                className="font-semibold"
               >
-                Verify Now
+                {kycConfig.buttonText}
               </Button>
             </div>
           </div>
         )}
 
+        {/* Stats Overview */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 animate-slide-up">
+          <div className="stat-card">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl">
+                <DollarSign className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-sm text-muted-foreground font-medium">Total Sent</span>
+            </div>
+            <p className="text-2xl font-bold text-foreground">
+              £{totalAmount.toLocaleString()}
+            </p>
+          </div>
+
+          <div className="stat-card">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl">
+                <CheckCircle2 className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-sm text-muted-foreground font-medium">Completed</span>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{completedTransactions}</p>
+          </div>
+
+          <div className="stat-card">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl">
+                <Clock className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-sm text-muted-foreground font-medium">Pending</span>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{pendingTransactions}</p>
+          </div>
+
+          <div className="stat-card">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl">
+                <TrendingUp className="h-5 w-5 text-white" />
+              </div>
+              <span className="text-sm text-muted-foreground font-medium">This Month</span>
+            </div>
+            <p className="text-2xl font-bold text-foreground">{totalTransactions}</p>
+          </div>
+        </div>
+
         {/* Exchange Rate */}
-        <ExchangeRateCard />
+        <div className="animate-slide-up">
+          <ExchangeRateCard />
+        </div>
 
         {/* Quick Actions */}
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="animate-slide-up">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-foreground">Quick Actions</h2>
+            <div className="h-1 flex-1 mx-4 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-full opacity-20"></div>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {quickActions.map((action, index) => {
               const Icon = action.icon;
               return (
                 <button
                   key={index}
                   onClick={() => navigate(action.href)}
-                  className="card-interactive p-4 text-left space-y-3"
+                  className={`group card-interactive p-6 text-left space-y-4 bg-gradient-to-br ${action.gradient}/5 hover:${action.gradient}/10 border-2 border-transparent hover:border-current transition-all duration-300`}
+                  style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <div className={`inline-flex p-3 ${action.color} rounded-lg`}>
-                    <Icon className="h-6 w-6 text-white" />
+                  <div className={`inline-flex p-4 bg-gradient-to-r ${action.gradient} ${action.hoverGradient} rounded-2xl shadow-lg group-hover:shadow-xl group-hover:scale-110 transition-all duration-300`}>
+                    <Icon className="h-7 w-7 text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-foreground">{action.label}</h3>
-                    <p className="text-sm text-muted-foreground">{action.description}</p>
+                    <h3 className="font-bold text-foreground text-lg group-hover:text-brand-primary transition-colors">{action.label}</h3>
+                    <p className="text-muted-foreground">{action.description}</p>
                   </div>
-                  <ArrowUpRight className="h-4 w-4 text-muted-foreground" />
+                  <ArrowUpRight className="h-5 w-5 text-muted-foreground group-hover:text-brand-primary group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
                 </button>
               );
             })}
@@ -99,53 +230,75 @@ export default function DashboardPage() {
         </div>
 
         {/* Recent Transactions */}
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Recent Transactions</h2>
+        <div className="animate-slide-up">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-foreground">Recent Transactions</h2>
             <Button 
               variant="ghost" 
-              size="sm"
               onClick={() => navigate('/history')}
+              className="font-semibold hover:bg-brand-primary/10 hover:text-brand-primary"
             >
               View All
+              <ArrowUpRight className="ml-1 h-4 w-4" />
             </Button>
           </div>
 
           {userTransactions.length > 0 ? (
-            <div className="space-y-3">
-              {userTransactions.map((transaction) => (
-                <TransactionCard
-                  key={transaction.id}
-                  transaction={transaction}
-                  onClick={() => navigate(`/transaction/${transaction.id}`)}
-                />
+            <div className="space-y-4">
+              {userTransactions.map((transaction, index) => (
+                <div 
+                  key={transaction.id} 
+                  className="animate-slide-up"
+                  style={{ animationDelay: `${index * 0.1}s` }}
+                >
+                  <TransactionCard
+                    transaction={transaction}
+                    onClick={() => navigate(`/transaction/${transaction.id}`)}
+                  />
+                </div>
               ))}
             </div>
           ) : (
-            <EmptyState
-              icon={History}
-              title="No transactions yet"
-              description="Start by sending your first GBP to USDT transfer"
-              actionLabel="Send Money"
-              onAction={() => navigate('/send')}
-            />
+            <div className="card-premium p-12">
+              <EmptyState
+                icon={History}
+                title="No transactions yet"
+                description="Start by sending your first GBP to USDT transfer and build your transaction history"
+                actionLabel="Send Money Now"
+                onAction={() => navigate('/send')}
+              />
+            </div>
           )}
         </div>
 
-        {/* Statistics */}
+        {/* Performance Insights */}
         {userTransactions.length > 0 && (
-          <div className="grid grid-cols-2 gap-4">
-            <div className="card-primary p-4 text-center">
-              <p className="text-2xl font-bold text-brand-primary">
-                {userTransactions.length}
-              </p>
-              <p className="text-sm text-muted-foreground">Total Transactions</p>
-            </div>
-            <div className="card-primary p-4 text-center">
-              <p className="text-2xl font-bold text-brand-success">
-                £{userTransactions.reduce((sum, tx) => sum + tx.gbpAmount, 0).toLocaleString()}
-              </p>
-              <p className="text-sm text-muted-foreground">Amount Sent</p>
+          <div className="card-gradient p-8 animate-slide-up">
+            <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
+              <TrendingUp className="h-6 w-6 text-brand-secondary" />
+              Your Performance
+            </h3>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold gradient-text mb-2">
+                  {((completedTransactions / totalTransactions) * 100).toFixed(0)}%
+                </div>
+                <div className="text-muted-foreground font-medium">Success Rate</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold gradient-text mb-2">
+                  £{(totalAmount / totalTransactions || 0).toLocaleString()}
+                </div>
+                <div className="text-muted-foreground font-medium">Average Transfer</div>
+              </div>
+              <div className="text-center">
+                <div className="text-3xl font-bold gradient-text mb-2">
+                  {userTransactions.filter(tx => 
+                    new Date(tx.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+                  ).length}
+                </div>
+                <div className="text-muted-foreground font-medium">This Month</div>
+              </div>
             </div>
           </div>
         )}
