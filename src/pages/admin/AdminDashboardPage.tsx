@@ -6,24 +6,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { mockTransactions, mockUsers, mockAdminStats } from '@/data/mockData';
 import { 
-  Users, 
-  CreditCard, 
-  Clock, 
   CheckCircle, 
-  TrendingUp,
-  AlertTriangle,
-  LogOut,
-  Bell,
   Eye,
   Trash2,
   UserCheck,
-  UserX
+  UserX,
+  MoreHorizontal,
+  Clock,
+  AlertTriangle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import AdminNavigation from '@/components/admin/AdminNavigation';
+import AdminStatsGrid from '@/components/admin/AdminStatsGrid';
+import { useAdminActions } from '@/hooks/useAdminActions';
 
 export default function AdminDashboardPage() {
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [notifications] = useState([
     {
@@ -44,345 +42,274 @@ export default function AdminDashboardPage() {
 
   const stats = mockAdminStats;
   const pendingTransactions = mockTransactions.filter(tx => tx.status === 'pending');
+  const completedTransactions = mockTransactions.filter(tx => tx.status === 'completed' || tx.status === 'usdt_sent').length;
   const pendingKYC = mockUsers.filter(u => u.kycStatus === 'under_review');
   const totalUsers = mockUsers.filter(u => u.role === 'user').length;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/admin/login');
+  const pendingCount = {
+    transactions: pendingTransactions.length,
+    kyc: pendingKYC.length,
+    notifications: notifications.filter(n => n.urgent).length
   };
 
-  const handleApproveTransaction = (transactionId: string) => {
-    toast.success('Transaction approved successfully');
-    console.log('Approving transaction:', transactionId);
-  };
-
-  const handleDeleteUser = (userId: string) => {
-    toast.success('User deleted successfully');
-    console.log('Deleting user:', userId);
-  };
-
-  const handleKYCAction = (userId: string, action: 'approve' | 'reject') => {
-    toast.success(`KYC ${action}d successfully`);
-    console.log(`${action}ing KYC for user:`, userId);
-  };
+  const {
+    isProcessing,
+    handleApproveTransaction,
+    handleKYCAction,
+    handleDeleteUser,
+    handleViewDetails
+  } = useAdminActions();
 
   return (
-    <div className="page-container">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-brand-primary">BridgePay Admin</h1>
-            <p className="text-sm text-muted-foreground">
-              Welcome back, {user?.firstName}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            {/* Notifications */}
-            <div className="relative">
-              <Button variant="outline" size="sm" className="relative">
-                <Bell className="h-4 w-4" />
-                {notifications.some(n => n.urgent) && (
-                  <Badge className="absolute -top-2 -right-2 bg-brand-error text-white text-xs">
-                    {notifications.filter(n => n.urgent).length}
-                  </Badge>
-                )}
-              </Button>
+    <div className="flex h-screen bg-background">
+      <AdminNavigation pendingCount={pendingCount} />
+      
+      {/* Main Content */}
+      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+        {/* Page Header */}
+        <div className="bg-card border-b border-border px-4 lg:px-6 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl lg:text-3xl font-bold text-brand-primary">Admin Dashboard</h1>
+              <p className="text-sm text-muted-foreground">
+                Welcome back, {user?.firstName}
+              </p>
             </div>
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Logout
-            </Button>
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="hidden sm:inline-flex">
+                {pendingCount.transactions + pendingCount.kyc} items need attention
+              </Badge>
+            </div>
           </div>
         </div>
-      </header>
 
-      <main className="container-padding py-6 space-y-6">
-        {/* Real-time Notifications */}
-        <Card className="border-brand-warning">
-          <CardHeader>
-            <CardTitle className="text-brand-warning flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5" />
-              Urgent Notifications
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {notifications.map((notification) => (
-                <div key={notification.id} className="flex justify-between items-start p-3 border border-border rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {notification.message}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{notification.time}</p>
-                  </div>
-                  <Badge variant={notification.urgent ? "destructive" : "secondary"}>
-                    {notification.type}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Pending Transactions
-                  </p>
-                  <p className="text-2xl font-bold text-brand-warning">
-                    {stats.pendingTransactions}
-                  </p>
-                </div>
-                <Clock className="h-8 w-8 text-brand-warning" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Pending KYC
-                  </p>
-                  <p className="text-2xl font-bold text-brand-secondary">
-                    {stats.pendingKYC}
-                  </p>
-                </div>
-                <AlertTriangle className="h-8 w-8 text-brand-secondary" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Total Users
-                  </p>
-                  <p className="text-2xl font-bold text-brand-primary">
-                    {totalUsers}
-                  </p>
-                </div>
-                <Users className="h-8 w-8 text-brand-primary" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Revenue Today
-                  </p>
-                  <p className="text-2xl font-bold text-brand-success">
-                    £{stats.revenue.today.toFixed(2)}
-                  </p>
-                </div>
-                <TrendingUp className="h-8 w-8 text-brand-success" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Pending Transactions - Admin Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Pending Transactions Requiring Approval</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {pendingTransactions.length > 0 ? (
-                pendingTransactions.map((transaction) => (
-                  <div key={transaction.id} className="border border-border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <p className="font-semibold text-foreground">
-                          £{transaction.gbpAmount} → {transaction.usdtAmount} USDT
+        {/* Main Content Area */}
+        <main className="flex-1 p-4 lg:p-6 space-y-6 overflow-auto">
+          {/* Urgent Notifications */}
+          {notifications.some(n => n.urgent) && (
+            <Card className="border-brand-warning bg-brand-warning/5">
+              <CardHeader>
+                <CardTitle className="text-brand-warning flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5" />
+                  Urgent Notifications
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {notifications.filter(n => n.urgent).map((notification) => (
+                    <div key={notification.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border border-border rounded-lg bg-background">
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-foreground">
+                          {notification.message}
                         </p>
-                        <p className="text-sm text-muted-foreground">
-                          Ref: {transaction.paymentReference}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          User ID: {transaction.userId}
-                        </p>
+                        <p className="text-xs text-muted-foreground">{notification.time}</p>
                       </div>
-                      <Badge variant="outline" className="text-brand-warning border-brand-warning">
-                        Awaiting Payment Confirmation
+                      <Badge variant="destructive" className="w-fit">
+                        {notification.type}
                       </Badge>
                     </div>
-                    
-                    <div className="flex gap-2">
-                      <Button 
-                        size="sm" 
-                        className="btn-primary"
-                        onClick={() => handleApproveTransaction(transaction.id)}
-                      >
-                        <CheckCircle className="h-4 w-4 mr-1" />
-                        Confirm Payment Received
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Eye className="h-4 w-4 mr-1" />
-                        View Details
-                      </Button>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4">
-                  No pending transactions
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-        {/* KYC Management */}
-        <Card>
-          <CardHeader>
-            <CardTitle>KYC Documents Pending Review</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {pendingKYC.length > 0 ? (
-                pendingKYC.map((user) => (
-                  <div key={user.id} className="border border-border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <p className="font-semibold text-foreground">
+          {/* Stats Grid */}
+          <AdminStatsGrid 
+            stats={stats} 
+            totalUsers={totalUsers} 
+            completedTransactions={completedTransactions}
+          />
+
+          {/* Pending Transactions */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <CardTitle>Pending Transactions</CardTitle>
+                <Badge variant="outline" className="w-fit">
+                  {pendingTransactions.length} pending
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pendingTransactions.length > 0 ? (
+                  pendingTransactions.map((transaction) => (
+                    <div key={transaction.id} className="border border-border rounded-lg p-4">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <p className="font-semibold text-foreground">
+                              £{transaction.gbpAmount} → {transaction.usdtAmount} USDT
+                            </p>
+                            <Badge variant="outline" className="text-brand-warning border-brand-warning w-fit">
+                              <Clock className="h-3 w-3 mr-1" />
+                              Pending
+                            </Badge>
+                          </div>
+                          <div className="text-sm text-muted-foreground space-y-1">
+                            <p>Ref: {transaction.paymentReference}</p>
+                            <p>User ID: {transaction.userId}</p>
+                            <p>Wallet: {transaction.walletAddress}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          <Button 
+                            size="sm" 
+                            className="btn-primary"
+                            disabled={isProcessing}
+                            onClick={() => handleApproveTransaction(transaction.id)}
+                          >
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewDetails('transaction', transaction.id)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Details
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-12 w-12 mx-auto text-brand-success mb-3" />
+                    <p className="text-muted-foreground">No pending transactions</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Pending KYC */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <CardTitle>KYC Documents Pending Review</CardTitle>
+                <Badge variant="outline" className="w-fit">
+                  {pendingKYC.length} pending
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {pendingKYC.length > 0 ? (
+                  pendingKYC.map((user) => (
+                    <div key={user.id} className="border border-border rounded-lg p-4">
+                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            <p className="font-semibold text-foreground">
+                              {user.firstName} {user.lastName}
+                            </p>
+                            <Badge variant="outline" className="text-brand-warning border-brand-warning w-fit">
+                              Under Review
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{user.email}</p>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-2">
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewDetails('kyc', user.id)}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            Documents
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            className="btn-primary"
+                            disabled={isProcessing}
+                            onClick={() => handleKYCAction(user.id, 'approve')}
+                          >
+                            <UserCheck className="h-4 w-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            className="text-brand-error border-brand-error hover:bg-brand-error hover:text-white"
+                            disabled={isProcessing}
+                            onClick={() => handleKYCAction(user.id, 'reject')}
+                          >
+                            <UserX className="h-4 w-4 mr-1" />
+                            Reject
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-12 w-12 mx-auto text-brand-success mb-3" />
+                    <p className="text-muted-foreground">No pending KYC reviews</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Recent Users */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <CardTitle>Recent Users</CardTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => navigate('/admin/users')}
+                >
+                  View All Users
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {mockUsers.filter(u => u.role === 'user').slice(0, 3).map((user) => (
+                  <div key={user.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-3 border border-border rounded-lg">
+                    <div className="flex-1">
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <p className="font-medium text-foreground">
                           {user.firstName} {user.lastName}
                         </p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <Badge variant={user.kycStatus === 'verified' ? 'default' : 'secondary'} className="w-fit">
+                          {user.kycStatus}
+                        </Badge>
                       </div>
-                      <Badge variant="outline" className="text-brand-warning border-brand-warning">
-                        Under Review
-                      </Badge>
+                      <p className="text-sm text-muted-foreground">{user.email}</p>
                     </div>
-                    
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
-                        <Eye className="h-4 w-4 mr-1" />
-                        View Documents
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        className="btn-primary"
-                        onClick={() => handleKYCAction(user.id, 'approve')}
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleViewDetails('user', user.id)}
                       >
-                        <UserCheck className="h-4 w-4 mr-1" />
-                        Approve
+                        <Eye className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         variant="outline"
                         className="text-brand-error border-brand-error hover:bg-brand-error hover:text-white"
-                        onClick={() => handleKYCAction(user.id, 'reject')}
+                        disabled={isProcessing}
+                        onClick={() => handleDeleteUser(user.id)}
                       >
-                        <UserX className="h-4 w-4 mr-1" />
-                        Reject
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
-                ))
-              ) : (
-                <p className="text-center text-muted-foreground py-4">
-                  No pending KYC reviews
-                </p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* User Management Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>User Management</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {mockUsers.filter(u => u.role === 'user').slice(0, 3).map((user) => (
-                <div key={user.id} className="flex justify-between items-center p-3 border border-border rounded-lg">
-                  <div>
-                    <p className="font-medium text-foreground">
-                      {user.firstName} {user.lastName}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{user.email}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={user.kycStatus === 'verified' ? 'default' : 'secondary'}>
-                      {user.kycStatus}
-                    </Badge>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="text-brand-error border-brand-error hover:bg-brand-error hover:text-white"
-                      onClick={() => handleDeleteUser(user.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="pt-4">
-              <Button variant="outline" onClick={() => navigate('/admin/users')} className="w-full">
-                View All Users
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Navigation */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/admin/transactions')}
-            className="p-6 h-auto"
-          >
-            <div className="text-center">
-              <CreditCard className="h-8 w-8 mx-auto mb-2 text-brand-primary" />
-              <p className="font-semibold">All Transactions</p>
-              <p className="text-sm text-muted-foreground">Manage all transactions</p>
-            </div>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/admin/kyc')}
-            className="p-6 h-auto"
-          >
-            <div className="text-center">
-              <Users className="h-8 w-8 mx-auto mb-2 text-brand-secondary" />
-              <p className="font-semibold">KYC Reviews</p>
-              <p className="text-sm text-muted-foreground">Review KYC documents</p>
-            </div>
-          </Button>
-          
-          <Button 
-            variant="outline" 
-            onClick={() => navigate('/admin/users')}
-            className="p-6 h-auto"
-          >
-            <div className="text-center">
-              <Users className="h-8 w-8 mx-auto mb-2 text-brand-primary" />
-              <p className="font-semibold">User Management</p>
-              <p className="text-sm text-muted-foreground">Manage all users</p>
-            </div>
-          </Button>
-        </div>
-      </main>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      </div>
     </div>
   );
 }
