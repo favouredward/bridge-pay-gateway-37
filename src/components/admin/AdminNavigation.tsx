@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -16,6 +15,7 @@ import {
 import { useAuthStore } from '@/store/authStore';
 import { NotificationBell } from '@/components/layout/NotificationBell';
 import { ThemeToggle } from '@/components/layout/ThemeToggle';
+import { cn } from '@/lib/utils';
 
 interface AdminNavigationProps {
   pendingCount: {
