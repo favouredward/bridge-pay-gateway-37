@@ -32,19 +32,10 @@ const queryClient = new QueryClient();
 
 // Protected Route wrapper
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
-  }
-
-  // Check if user needs KYC for certain routes
-  const needsKYC = user?.kycStatus !== 'verified';
-  const restrictedPaths = ['/send'];
-  const currentPath = window.location.pathname;
-  
-  if (needsKYC && restrictedPaths.includes(currentPath)) {
-    return <Navigate to="/kyc" replace />;
   }
 
   return <>{children}</>;
