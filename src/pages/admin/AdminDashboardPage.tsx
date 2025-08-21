@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +10,6 @@ import {
   Trash2,
   UserCheck,
   UserX,
-  MoreHorizontal,
   Clock,
   AlertTriangle
 } from 'lucide-react';
@@ -19,10 +17,13 @@ import { useNavigate } from 'react-router-dom';
 import AdminNavigation from '@/components/admin/AdminNavigation';
 import AdminStatsGrid from '@/components/admin/AdminStatsGrid';
 import { useAdminActions } from '@/hooks/useAdminActions';
+import { useNotificationStore } from '@/store/notificationStore';
 
 export default function AdminDashboardPage() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const { addNotification } = useNotificationStore();
+  
   const [notifications] = useState([
     {
       id: 1,
@@ -65,9 +66,9 @@ export default function AdminDashboardPage() {
       <AdminNavigation pendingCount={pendingCount} />
       
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
-        {/* Page Header */}
-        <div className="bg-card border-b border-border px-4 lg:px-6 py-4">
+      <div className="flex-1 lg:ml-64 xl:ml-72 flex flex-col min-h-screen">
+        {/* Page Header - Hidden on mobile as it's in navigation */}
+        <div className="hidden lg:block bg-card border-b border-border px-4 lg:px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-brand-primary">Admin Dashboard</h1>
@@ -84,29 +85,37 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-4 lg:p-6 space-y-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-auto">
+          {/* Mobile Page Title */}
+          <div className="lg:hidden">
+            <h1 className="text-xl sm:text-2xl font-bold text-brand-primary">Dashboard</h1>
+            <p className="text-sm text-muted-foreground">Welcome back, {user?.firstName}</p>
+          </div>
+
           {/* Urgent Notifications */}
           {notifications.some(n => n.urgent) && (
             <Card className="border-brand-warning bg-brand-warning/5">
-              <CardHeader>
-                <CardTitle className="text-brand-warning flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5" />
+              <CardHeader className="pb-3">
+                <CardTitle className="text-brand-warning flex items-center gap-2 text-base sm:text-lg">
+                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5" />
                   Urgent Notifications
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   {notifications.filter(n => n.urgent).map((notification) => (
-                    <div key={notification.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 p-3 border border-border rounded-lg bg-background">
+                    <div key={notification.id} className="flex flex-col gap-2 p-3 border border-border rounded-lg bg-background">
                       <div className="flex-1">
                         <p className="text-sm font-medium text-foreground">
                           {notification.message}
                         </p>
-                        <p className="text-xs text-muted-foreground">{notification.time}</p>
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-xs text-muted-foreground">{notification.time}</p>
+                          <Badge variant="destructive" className="text-xs">
+                            {notification.type}
+                          </Badge>
+                        </div>
                       </div>
-                      <Badge variant="destructive" className="w-fit">
-                        {notification.type}
-                      </Badge>
                     </div>
                   ))}
                 </div>
@@ -123,53 +132,54 @@ export default function AdminDashboardPage() {
 
           {/* Pending Transactions */}
           <Card>
-            <CardHeader>
+            <CardHeader className="pb-3">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <CardTitle>Pending Transactions</CardTitle>
-                <Badge variant="outline" className="w-fit">
+                <CardTitle className="text-base sm:text-lg">Pending Transactions</CardTitle>
+                <Badge variant="outline" className="w-fit text-xs">
                   {pendingTransactions.length} pending
                 </Badge>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {pendingTransactions.length > 0 ? (
                   pendingTransactions.map((transaction) => (
-                    <div key={transaction.id} className="border border-border rounded-lg p-4">
-                      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    <div key={transaction.id} className="border border-border rounded-lg p-3 sm:p-4">
+                      <div className="flex flex-col gap-3 sm:gap-4">
                         <div className="flex-1 space-y-2">
                           <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                            <p className="font-semibold text-foreground">
+                            <p className="font-semibold text-foreground text-sm sm:text-base">
                               £{transaction.gbpAmount} → {transaction.usdtAmount} USDT
                             </p>
-                            <Badge variant="outline" className="text-brand-warning border-brand-warning w-fit">
+                            <Badge variant="outline" className="text-brand-warning border-brand-warning w-fit text-xs">
                               <Clock className="h-3 w-3 mr-1" />
                               Pending
                             </Badge>
                           </div>
-                          <div className="text-sm text-muted-foreground space-y-1">
+                          <div className="text-xs sm:text-sm text-muted-foreground space-y-1">
                             <p>Ref: {transaction.paymentReference}</p>
                             <p>User ID: {transaction.userId}</p>
-                            <p>Wallet: {transaction.walletAddress}</p>
+                            <p className="break-all">Wallet: {transaction.walletAddress}</p>
                           </div>
                         </div>
                         
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <Button 
                             size="sm" 
-                            className="btn-primary"
+                            className="btn-primary text-xs sm:text-sm"
                             disabled={isProcessing}
                             onClick={() => handleApproveTransaction(transaction.id)}
                           >
-                            <CheckCircle className="h-4 w-4 mr-1" />
+                            <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             Approve
                           </Button>
                           <Button 
                             size="sm" 
                             variant="outline"
+                            className="text-xs sm:text-sm"
                             onClick={() => handleViewDetails('transaction', transaction.id)}
                           >
-                            <Eye className="h-4 w-4 mr-1" />
+                            <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                             Details
                           </Button>
                         </div>
@@ -177,9 +187,9 @@ export default function AdminDashboardPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8">
-                    <CheckCircle className="h-12 w-12 mx-auto text-brand-success mb-3" />
-                    <p className="text-muted-foreground">No pending transactions</p>
+                  <div className="text-center py-6 sm:py-8">
+                    <CheckCircle className="h-10 w-10 sm:h-12 sm:w-12 mx-auto text-brand-success mb-3" />
+                    <p className="text-muted-foreground text-sm">No pending transactions</p>
                   </div>
                 )}
               </div>

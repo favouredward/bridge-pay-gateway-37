@@ -1,10 +1,11 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useAuthStore } from "@/store/authStore";
+import { useEffect } from "react";
+import { initializeTheme } from "@/store/themeStore";
 
 // Pages
 import LandingPage from "./pages/LandingPage";
@@ -52,89 +53,95 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+const App = () => {
+  useEffect(() => {
+    initializeTheme();
+  }, []);
 
-          {/* Protected User Routes */}
-          <Route path="/dashboard" element={
-            <ProtectedRoute>
-              <DashboardPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/send" element={
-            <ProtectedRoute>
-              <SendMoneyPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/history" element={
-            <ProtectedRoute>
-              <TransactionHistoryPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/transaction/:id" element={
-            <ProtectedRoute>
-              <TransactionDetailsPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/kyc" element={
-            <ProtectedRoute>
-              <KYCPage />
-            </ProtectedRoute>
-          } />
-          <Route path="/profile" element={
-            <ProtectedRoute>
-              <ProfilePage />
-            </ProtectedRoute>
-          } />
-          <Route path="/receipt/:id" element={
-            <ProtectedRoute>
-              <ReceiptPage />
-            </ProtectedRoute>
-          } />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/signup" element={<SignupPage />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/login" element={<AdminLoginPage />} />
-          <Route path="/admin/dashboard" element={
-            <AdminRoute>
-              <AdminDashboardPage />
-            </AdminRoute>
-          } />
-          <Route path="/admin/transactions" element={
-            <AdminRoute>
-              <AdminTransactionsPage />
-            </AdminRoute>
-          } />
-          <Route path="/admin/kyc" element={
-            <AdminRoute>
-              <AdminKYCPage />
-            </AdminRoute>
-          } />
-          <Route path="/admin/users" element={
-            <AdminRoute>
-              <AdminUsersPage />
-            </AdminRoute>
-          } />
-          <Route path="/admin/settings" element={
-            <AdminRoute>
-              <AdminSettingsPage />
-            </AdminRoute>
-          } />
+            {/* Protected User Routes */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <DashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/send" element={
+              <ProtectedRoute>
+                <SendMoneyPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/history" element={
+              <ProtectedRoute>
+                <TransactionHistoryPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/transaction/:id" element={
+              <ProtectedRoute>
+                <TransactionDetailsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/kyc" element={
+              <ProtectedRoute>
+                <KYCPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
+            <Route path="/receipt/:id" element={
+              <ProtectedRoute>
+                <ReceiptPage />
+              </ProtectedRoute>
+            } />
 
-          {/* Catch all */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLoginPage />} />
+            <Route path="/admin/dashboard" element={
+              <AdminRoute>
+                <AdminDashboardPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/transactions" element={
+              <AdminRoute>
+                <AdminTransactionsPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/kyc" element={
+              <AdminRoute>
+                <AdminKYCPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/users" element={
+              <AdminRoute>
+                <AdminUsersPage />
+              </AdminRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <AdminRoute>
+                <AdminSettingsPage />
+              </AdminRoute>
+            } />
+
+            {/* Catch all */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
