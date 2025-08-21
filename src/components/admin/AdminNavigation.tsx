@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -135,7 +136,7 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
       </aside>
 
       {/* Mobile Header */}
-      <header className="lg:hidden flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6 bg-card border-b border-border sticky top-0 z-50">
+      <header className="lg:hidden flex items-center justify-between h-14 px-4 bg-card border-b border-border sticky top-0 z-50">
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
@@ -146,10 +147,10 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
             <Menu className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
+            <div className="w-6 h-6 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xs">B</span>
             </div>
-            <h1 className="text-sm sm:text-lg font-bold text-brand-primary">Admin</h1>
+            <h1 className="text-sm font-bold text-brand-primary">Admin</h1>
           </div>
         </div>
 
@@ -165,8 +166,8 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
-          <div className="fixed inset-y-0 left-0 w-72 sm:w-80 bg-card border-r border-border" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center justify-between h-16 px-4 sm:px-6 border-b border-border">
+          <div className="fixed inset-y-0 left-0 w-72 bg-card border-r border-border" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between h-16 px-4 border-b border-border">
               <div className="flex items-center gap-3">
                 <div className="w-7 h-7 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl flex items-center justify-center">
                   <span className="text-white font-bold text-sm">B</span>
@@ -183,7 +184,7 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
               </Button>
             </div>
 
-            <nav className="px-4 sm:px-6 py-4 space-y-2">
+            <nav className="px-4 py-4 space-y-2">
               {navigationItems.map((item) => {
                 const isActive = location.pathname === item.path;
                 return (
@@ -210,7 +211,7 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
               })}
             </nav>
 
-            <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 border-t border-border bg-card">
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-border bg-card">
               <div className="text-xs text-muted-foreground mb-3">
                 Signed in as <span className="font-medium">{user?.firstName} {user?.lastName}</span>
               </div>

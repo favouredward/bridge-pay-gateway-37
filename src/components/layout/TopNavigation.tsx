@@ -25,7 +25,7 @@ export function TopNavigation() {
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6">
+        <div className="container max-w-7xl mx-auto flex h-14 sm:h-16 items-center justify-between px-4 sm:px-6">
           {/* Logo and Brand */}
           <div className="flex items-center gap-4 sm:gap-6">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -76,7 +76,7 @@ export function TopNavigation() {
               size="sm" 
               className="p-2 hover:bg-brand-primary/10 hover:text-brand-primary rounded-xl"
             >
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-to-r from-brand-secondary to-brand-accent rounded-lg sm:rounded-xl flex items-center justify-center">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-r from-brand-secondary to-brand-accent rounded-lg flex items-center justify-center">
                 <User className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
               </div>
             </Button>
@@ -100,7 +100,7 @@ export function TopNavigation() {
         {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="lg:hidden border-t border-border/40 bg-background/95 backdrop-blur">
-            <nav className="container px-4 py-4 space-y-2">
+            <nav className="container max-w-7xl mx-auto px-4 py-4 space-y-2">
               {navigation.map((item) => {
                 const isActive = location.pathname === item.href;
                 return (
