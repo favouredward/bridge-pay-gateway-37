@@ -11,7 +11,7 @@ import { Eye, EyeOff, Shield } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
-  const { login, setLoading } = useAuthStore();
+  const { signIn, setLoading } = useAuthStore();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -44,22 +44,15 @@ export default function AdminLoginPage() {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mock admin authentication
-      const admin = mockUsers.find(
-        u => u.email === formData.email && u.role === 'admin'
-      );
-
-      if (admin) {
-        const token = 'mock-admin-jwt-token-' + admin.id;
-        login(token, admin);
-        toast.success('Admin login successful!');
-        navigate('/admin/dashboard');
-      } else {
-        toast.error('Invalid admin credentials');
+      const { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        toast.error(error);
+        return;
       }
+
+      toast.success('Admin login successful!');
+      navigate('/admin/dashboard');
     } catch (error) {
       toast.error('Login failed. Please try again.');
     } finally {

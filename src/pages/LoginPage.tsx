@@ -11,7 +11,7 @@ import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, setLoading } = useAuthStore();
+  const { signIn, setLoading } = useAuthStore();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -44,22 +44,15 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Mock authentication
-      const user = mockUsers.find(
-        u => u.email === formData.email && u.role !== 'admin'
-      );
-
-      if (user) {
-        const token = 'mock-jwt-token-' + user.id;
-        login(token, user);
-        toast.success('Login successful!');
-        navigate('/dashboard');
-      } else {
-        toast.error('Invalid email or password');
+      const { error } = await signIn(formData.email, formData.password);
+      
+      if (error) {
+        toast.error(error);
+        return;
       }
+
+      toast.success('Login successful!');
+      navigate('/dashboard');
     } catch (error) {
       toast.error('Login failed. Please try again.');
     } finally {

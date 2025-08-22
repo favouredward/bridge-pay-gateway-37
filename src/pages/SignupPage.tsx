@@ -11,7 +11,7 @@ import { Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 export default function SignupPage() {
   const navigate = useNavigate();
-  const { login, setLoading } = useAuthStore();
+  const { signUp, setLoading } = useAuthStore();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -67,24 +67,18 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Create new user
-      const newUser = {
-        id: 'user-new-' + Date.now(),
+      const { error } = await signUp({
         email: formData.email,
+        password: formData.password,
         firstName: formData.firstName,
         lastName: formData.lastName,
-        kycStatus: 'pending' as const,
-        role: 'user' as const,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-
-      const token = 'mock-jwt-token-' + newUser.id;
-      login(token, newUser);
+      });
       
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
       toast.success('Account created successfully!');
       navigate('/kyc');
     } catch (error) {

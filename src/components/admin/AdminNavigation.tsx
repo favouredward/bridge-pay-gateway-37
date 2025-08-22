@@ -29,7 +29,7 @@ interface AdminNavigationProps {
 export default function AdminNavigation({ pendingCount }: AdminNavigationProps) {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout, user } = useAuthStore();
+  const { signOut, user } = useAuthStore();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navigationItems = [
@@ -65,8 +65,8 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
     }
   ];
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/admin/login');
   };
 

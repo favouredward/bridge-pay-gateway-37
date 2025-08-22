@@ -54,7 +54,7 @@ const getKYCStatusConfig = (status: string) => {
 };
 
 export default function ProfilePage() {
-  const { user, logout } = useAuthStore();
+  const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
 
   if (!user) {
@@ -65,8 +65,8 @@ export default function ProfilePage() {
   const kycStatus = getKYCStatusConfig(user.kycStatus);
   const StatusIcon = kycStatus.icon;
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
   };
 
