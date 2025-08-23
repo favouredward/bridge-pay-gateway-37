@@ -25,15 +25,56 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       initialize: async () => {
         set({ isLoading: true });
         try {
-          const user = await authService.getCurrentUser();
-          if (user) {
-            const { data: { session } } = await supabase.auth.getSession();
-            set({
-              user,
-              token: session?.access_token || null,
-              isAuthenticated: true,
-              isLoading: false,
-            });
+          // Set up auth state listener
+          supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('Auth state changed:', event, session?.user?.id);
+            
+            if (session?.user) {
+              const user = await authService.getCurrentUser();
+              if (user) {
+                set({
+                  user,
+                  token: session.access_token,
+                  isAuthenticated: true,
+                  isLoading: false,
+                });
+              } else {
+                set({
+                  user: null,
+                  token: null,
+                  isAuthenticated: false,
+                  isLoading: false,
+                });
+              }
+            } else {
+              set({
+                user: null,
+                token: null,
+                isAuthenticated: false,
+                isLoading: false,
+              });
+            }
+          });
+
+          // Check for existing session
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            const user = await authService.getCurrentUser();
+            if (user) {
+              set({
+                user,
+                token: session.access_token,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            } else {
+              set({
+                user: null,
+                token: null,
+                isAuthenticated: false,
+                isLoading: false,
+              });
+            }
           } else {
             set({
               user: null,
@@ -55,40 +96,50 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       signUp: async (data) => {
         set({ isLoading: true });
-        const { user, error } = await authService.signUp(data);
-        
-        if (user) {
-          const { data: { session } } = await supabase.auth.getSession();
-          set({
-            user,
-            token: session?.access_token || null,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-        } else {
+        try {
+          const { user, error } = await authService.signUp(data);
+          
+          if (user && !error) {
+            const { data: { session } } = await supabase.auth.getSession();
+            set({
+              user,
+              token: session?.access_token || null,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            set({ isLoading: false });
+          }
+          
+          return { error };
+        } catch (error) {
           set({ isLoading: false });
+          return { error: (error as Error).message };
         }
-        
-        return { error };
       },
 
       signIn: async (email: string, password: string) => {
         set({ isLoading: true });
-        const { user, error } = await authService.signIn(email, password);
-        
-        if (user) {
-          const { data: { session } } = await supabase.auth.getSession();
-          set({
-            user,
-            token: session?.access_token || null,
-            isAuthenticated: true,
-            isLoading: false,
-          });
-        } else {
+        try {
+          const { user, error } = await authService.signIn(email, password);
+          
+          if (user && !error) {
+            const { data: { session } } = await supabase.auth.getSession();
+            set({
+              user,
+              token: session?.access_token || null,
+              isAuthenticated: true,
+              isLoading: false,
+            });
+          } else {
+            set({ isLoading: false });
+          }
+          
+          return { error };
+        } catch (error) {
           set({ isLoading: false });
+          return { error: (error as Error).message };
         }
-        
-        return { error };
       },
 
       signOut: async () => {

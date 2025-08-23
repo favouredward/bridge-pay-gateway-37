@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@/types';
 
@@ -20,6 +21,14 @@ export const authService = {
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
+        options: {
+          data: {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+          },
+          emailRedirectTo: `${window.location.origin}/dashboard`
+        }
       });
 
       if (authError) {
@@ -27,32 +36,70 @@ export const authService = {
       }
 
       if (authData.user) {
-        // Create profile
-        const { error: profileError } = await supabase
+        // Wait a moment for the trigger to create the profile
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Fetch the created profile
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .insert({
-            user_id: authData.user.id,
-            first_name: data.firstName,
-            last_name: data.lastName,
-            phone: data.phone,
-            kyc_status: 'pending',
-            role: 'user',
-          });
+          .select('*')
+          .eq('user_id', authData.user.id)
+          .single();
 
         if (profileError) {
-          return { user: null, error: profileError.message };
+          console.error('Profile fetch error:', profileError);
+          // If profile doesn't exist, create it manually as fallback
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: authData.user.id,
+              first_name: data.firstName,
+              last_name: data.lastName,
+              phone: data.phone,
+              kyc_status: 'pending',
+              role: 'user',
+            });
+
+          if (insertError) {
+            return { user: null, error: 'Failed to create user profile' };
+          }
+
+          // Fetch the manually created profile
+          const { data: newProfile, error: newProfileError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', authData.user.id)
+            .single();
+
+          if (newProfileError || !newProfile) {
+            return { user: null, error: 'Failed to fetch user profile' };
+          }
+
+          const user: User = {
+            id: authData.user.id,
+            email: authData.user.email!,
+            firstName: newProfile.first_name,
+            lastName: newProfile.last_name,
+            phone: newProfile.phone,
+            kycStatus: newProfile.kyc_status as User['kycStatus'],
+            role: newProfile.role as User['role'],
+            createdAt: newProfile.created_at,
+            updatedAt: newProfile.updated_at,
+          };
+
+          return { user, error: null };
         }
 
         const user: User = {
           id: authData.user.id,
           email: authData.user.email!,
-          firstName: data.firstName,
-          lastName: data.lastName,
-          phone: data.phone,
-          kycStatus: 'pending',
-          role: 'user',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          firstName: profile.first_name,
+          lastName: profile.last_name,
+          phone: profile.phone,
+          kycStatus: profile.kyc_status as User['kycStatus'],
+          role: profile.role as User['role'],
+          createdAt: profile.created_at,
+          updatedAt: profile.updated_at,
         };
 
         return { user, error: null };
@@ -60,6 +107,7 @@ export const authService = {
 
       return { user: null, error: 'Failed to create user' };
     } catch (error) {
+      console.error('Signup error:', error);
       return { user: null, error: (error as Error).message };
     }
   },
@@ -83,7 +131,7 @@ export const authService = {
           .single();
 
         if (profileError || !profile) {
-          return { user: null, error: 'Profile not found' };
+          return { user: null, error: 'Profile not found. Please contact support.' };
         }
 
         // Update last login
@@ -110,6 +158,7 @@ export const authService = {
 
       return { user: null, error: 'Login failed' };
     } catch (error) {
+      console.error('Signin error:', error);
       return { user: null, error: (error as Error).message };
     }
   },
