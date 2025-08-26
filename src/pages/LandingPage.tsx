@@ -38,23 +38,44 @@ const testimonials = [
   {
     name: 'Sarah Johnson',
     role: 'Crypto Trader',
-    content: 'BridgePay has revolutionized how I move money. The speed and reliability are unmatched.',
+    content: 'BridgePay has revolutionized how I move money. The speed and reliability are unmatched. Best platform I\'ve used for GBP to USDT transfers.',
     rating: 5,
     avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face',
   },
   {
     name: 'Michael Chen', 
     role: 'Business Owner',
-    content: 'Finally, a service that understands the needs of modern businesses. Exceptional experience.',
-    rating: 5,
+    content: 'Great service overall. The only minor issue was a slight delay during peak hours, but customer support sorted it quickly. Would recommend.',
+    rating: 4,
     avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=64&h=64&fit=crop&crop=face',
   },
   {
     name: 'Emma Wilson',
     role: 'Digital Nomad',
-    content: 'BridgePay makes international payments effortless. I can focus on my work, not currency conversion.',
+    content: 'BridgePay makes international payments effortless. I can focus on my work, not currency conversion. Absolutely love the mobile app.',
     rating: 5,
     avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=64&h=64&fit=crop&crop=face',
+  },
+  {
+    name: 'James Rodriguez',
+    role: 'Freelancer',
+    content: 'Solid platform with competitive rates. The interface could be more intuitive, but once you get used to it, transfers are smooth.',
+    rating: 4,
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=64&h=64&fit=crop&crop=face',
+  },
+  {
+    name: 'Lisa Thompson',
+    role: 'Investment Manager',
+    content: 'Impressed with the security features and FCA regulation. Had one transaction that took longer than expected, but generally reliable.',
+    rating: 4,
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=64&h=64&fit=crop&crop=face',
+  },
+  {
+    name: 'David Park',
+    role: 'Tech Entrepreneur',
+    content: 'Amazing platform! Lightning-fast transfers and transparent fees. This is exactly what the crypto space needed. Game changer!',
+    rating: 5,
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=64&h=64&fit=crop&crop=face',
   },
 ];
 
@@ -137,26 +158,32 @@ export default function LandingPage() {
               </div>
 
               {/* Trust Indicators */}
-              <div className="flex items-center gap-8">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
+                <div className="flex items-center gap-3">
                   <div className="flex -space-x-2">
-                    {testimonials.slice(0, 3).map((testimonial, index) => (
+                    {testimonials.slice(0, 4).map((testimonial, index) => (
                       <img
                         key={index}
                         src={testimonial.avatar}
                         alt={testimonial.name}
-                        className="w-10 h-10 rounded-full border-2 border-white shadow-lg"
+                        className="w-10 h-10 rounded-full border-2 border-background shadow-lg object-cover"
                       />
                     ))}
                   </div>
                   <div className="text-sm">
-                    <div className="flex items-center gap-1">
-                      {[...Array(5)].map((_, i) => (
+                    <div className="flex items-center gap-1 mb-1">
+                      {[...Array(4)].map((_, i) => (
                         <Star key={i} className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                       ))}
+                      <Star className="h-4 w-4 fill-yellow-400/50 text-yellow-400" />
+                      <span className="ml-1 text-xs text-muted-foreground">4.6/5</span>
                     </div>
-                    <span className="text-muted-foreground">25,000+ happy customers</span>
+                    <span className="text-muted-foreground">25,000+ customers</span>
                   </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Shield className="h-4 w-4 text-brand-secondary" />
+                  <span>FCA Regulated & Secure</span>
                 </div>
               </div>
             </div>
@@ -274,12 +301,12 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="relative">
+            <div className="relative lg:justify-self-end">
               <div className="absolute inset-0 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-3xl blur-3xl opacity-20"></div>
               <img
                 src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&h=800&fit=crop&crop=center"
                 alt="Professional fintech interface"
-                className="relative z-10 w-full rounded-3xl shadow-2xl"
+                className="relative z-10 w-full max-w-md mx-auto lg:mx-0 rounded-3xl shadow-2xl"
               />
             </div>
           </div>
@@ -298,13 +325,23 @@ export default function LandingPage() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <div key={index} className="card-premium p-8 animate-slide-up" style={{ animationDelay: `${index * 0.2}s` }}>
+              <div key={index} className="card-premium p-8 animate-slide-up" style={{ animationDelay: `${index * 0.15}s` }}>
                 <div className="flex items-center gap-2 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+                  {[...Array(5)].map((_, i) => (
+                    <Star 
+                      key={i} 
+                      className={`h-5 w-5 ${
+                        i < testimonial.rating 
+                          ? 'fill-yellow-400 text-yellow-400' 
+                          : 'fill-gray-200 text-gray-200'
+                      }`} 
+                    />
                   ))}
+                  <span className="text-sm text-muted-foreground ml-2">
+                    {testimonial.rating}/5
+                  </span>
                 </div>
                 <p className="text-foreground text-lg mb-6 leading-relaxed">
                   "{testimonial.content}"
@@ -313,7 +350,7 @@ export default function LandingPage() {
                   <img
                     src={testimonial.avatar}
                     alt={testimonial.name}
-                    className="w-12 h-12 rounded-full border-2 border-border"
+                    className="w-12 h-12 rounded-full border-2 border-border object-cover"
                   />
                   <div>
                     <div className="font-semibold text-foreground">{testimonial.name}</div>
