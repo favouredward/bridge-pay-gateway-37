@@ -25,27 +25,30 @@ export const useAuthStore = create<AuthState & AuthActions>()(
       initialize: async () => {
         set({ isLoading: true });
         try {
-          // Set up auth state listener
-          supabase.auth.onAuthStateChange(async (event, session) => {
+          // Set up auth state listener FIRST
+          supabase.auth.onAuthStateChange((event, session) => {
             console.log('Auth state changed:', event, session?.user?.id);
             
             if (session?.user) {
-              const user = await authService.getCurrentUser();
-              if (user) {
-                set({
-                  user,
-                  token: session.access_token,
-                  isAuthenticated: true,
-                  isLoading: false,
-                });
-              } else {
-                set({
-                  user: null,
-                  token: null,
-                  isAuthenticated: false,
-                  isLoading: false,
-                });
-              }
+              // Defer profile fetching to avoid blocking the auth state change
+              setTimeout(async () => {
+                const user = await authService.getCurrentUser();
+                if (user) {
+                  set({
+                    user,
+                    token: session.access_token,
+                    isAuthenticated: true,
+                    isLoading: false,
+                  });
+                } else {
+                  set({
+                    user: null,
+                    token: null,
+                    isAuthenticated: false,
+                    isLoading: false,
+                  });
+                }
+              }, 0);
             } else {
               set({
                 user: null,
@@ -76,12 +79,7 @@ export const useAuthStore = create<AuthState & AuthActions>()(
               });
             }
           } else {
-            set({
-              user: null,
-              token: null,
-              isAuthenticated: false,
-              isLoading: false,
-            });
+            set({ isLoading: false });
           }
         } catch (error) {
           console.error('Auth initialization error:', error);

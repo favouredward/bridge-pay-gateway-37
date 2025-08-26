@@ -36,58 +36,23 @@ export const authService = {
       }
 
       if (authData.user) {
-        // Wait a moment for the trigger to create the profile
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait for trigger to create profile, then fetch it
+        await new Promise(resolve => setTimeout(resolve, 1500));
         
-        // Fetch the created profile
+        // Fetch the profile created by the trigger
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('user_id', authData.user.id)
-          .single();
+          .maybeSingle();
 
         if (profileError) {
           console.error('Profile fetch error:', profileError);
-          // If profile doesn't exist, create it manually as fallback
-          const { error: insertError } = await supabase
-            .from('profiles')
-            .insert({
-              user_id: authData.user.id,
-              first_name: data.firstName,
-              last_name: data.lastName,
-              phone: data.phone,
-              kyc_status: 'pending',
-              role: 'user',
-            });
+          return { user: null, error: 'Failed to create user profile. Please try again.' };
+        }
 
-          if (insertError) {
-            return { user: null, error: 'Failed to create user profile' };
-          }
-
-          // Fetch the manually created profile
-          const { data: newProfile, error: newProfileError } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('user_id', authData.user.id)
-            .single();
-
-          if (newProfileError || !newProfile) {
-            return { user: null, error: 'Failed to fetch user profile' };
-          }
-
-          const user: User = {
-            id: authData.user.id,
-            email: authData.user.email!,
-            firstName: newProfile.first_name,
-            lastName: newProfile.last_name,
-            phone: newProfile.phone,
-            kycStatus: newProfile.kyc_status as User['kycStatus'],
-            role: newProfile.role as User['role'],
-            createdAt: newProfile.created_at,
-            updatedAt: newProfile.updated_at,
-          };
-
-          return { user, error: null };
+        if (!profile) {
+          return { user: null, error: 'User profile was not created. Please try again.' };
         }
 
         const user: User = {
@@ -128,7 +93,7 @@ export const authService = {
           .from('profiles')
           .select('*')
           .eq('user_id', authData.user.id)
-          .single();
+          .maybeSingle();
 
         if (profileError || !profile) {
           return { user: null, error: 'Profile not found. Please contact support.' };
@@ -182,7 +147,7 @@ export const authService = {
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (!profile) return null;
 
