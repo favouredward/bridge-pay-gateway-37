@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/layout/Header';
+import { TopNavigation } from '@/components/layout/TopNavigation';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
 import { AmountCalculator } from '@/components/calculator/AmountCalculator';
 import { Button } from '@/components/ui/button';
@@ -30,10 +30,10 @@ export default function SendMoneyPage() {
   // Check if user is KYC verified
   if (user?.kycStatus !== 'verified') {
     return (
-      <div className="page-container mobile-safe-area">
-        <Header title="Send Money" />
-        <main className="container-padding py-6">
-          <div className="card-primary p-6 text-center">
+      <div className="min-h-screen bg-background">
+        <TopNavigation />
+        <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
+          <div className="card-premium p-6 text-center">
             <h2 className="text-xl font-semibold text-foreground mb-4">
               KYC Verification Required
             </h2>
@@ -342,13 +342,10 @@ export default function SendMoneyPage() {
   };
 
   return (
-    <div className="page-container mobile-safe-area">
-      <Header 
-        title="Send Money" 
-        showMenu={false}
-      />
+    <div className="min-h-screen bg-background">
+      <TopNavigation />
       
-      <main className="container-padding py-6 space-y-6">
+      <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
         {/* Progress */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">

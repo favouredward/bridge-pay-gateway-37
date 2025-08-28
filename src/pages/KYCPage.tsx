@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Header } from '@/components/layout/Header';
+import { TopNavigation } from '@/components/layout/TopNavigation';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -52,7 +52,7 @@ export default function KYCPage() {
   if (user?.kycStatus === 'under_review') {
     return (
       <div className="page-container mobile-safe-area">
-        <Header title="KYC Verification" />
+        <TopNavigation />
         <main className="container-padding py-6">
           <div className="text-center space-y-6">
             <div className="inline-flex p-4 bg-brand-warning/10 rounded-full">
@@ -83,7 +83,7 @@ export default function KYCPage() {
   if (user?.kycStatus === 'verified') {
     return (
       <div className="page-container mobile-safe-area">
-        <Header title="KYC Verification" />
+        <TopNavigation />
         <main className="container-padding py-6">
           <div className="text-center space-y-6">
             <div className="inline-flex p-4 bg-brand-success/10 rounded-full">
@@ -113,7 +113,7 @@ export default function KYCPage() {
   if (user?.kycStatus === 'rejected') {
     return (
       <div className="page-container mobile-safe-area">
-        <Header title="KYC Verification" />
+        <TopNavigation />
         <main className="container-padding py-6">
           <div className="text-center space-y-6">
             <div className="inline-flex p-4 bg-brand-error/10 rounded-full">
@@ -488,7 +488,7 @@ export default function KYCPage() {
 
   return (
     <div className="page-container mobile-safe-area">
-      <Header title="KYC Verification" />
+      <TopNavigation />
       
       <main className="container-padding py-6 space-y-6">
         {/* Progress */}

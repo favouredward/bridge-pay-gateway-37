@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Header } from '@/components/layout/Header';
+import { TopNavigation } from '@/components/layout/TopNavigation';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
 import { TransactionCard } from '@/components/transactions/TransactionCard';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -54,10 +54,10 @@ export default function TransactionHistoryPage() {
   };
 
   return (
-    <div className="page-container mobile-safe-area">
-      <Header title="Transaction History" />
+    <div className="min-h-screen bg-background">
+      <TopNavigation />
       
-      <main className="container-padding py-6 space-y-6">
+      <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
         {/* Search and Filters */}
         <div className="space-y-4">
           <div className="flex gap-3">
@@ -81,7 +81,7 @@ export default function TransactionHistoryPage() {
           </div>
 
           {showFilters && (
-            <div className="card-primary p-4 space-y-4">
+            <div className="card-premium p-4 space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="form-label">Status</label>
@@ -157,13 +157,13 @@ export default function TransactionHistoryPage() {
         {/* Summary Stats */}
         {userTransactions.length > 0 && (
           <div className="grid grid-cols-2 gap-4">
-            <div className="card-primary p-4 text-center">
+            <div className="card-premium p-4 text-center">
               <p className="text-lg font-bold text-foreground">
                 {userTransactions.length}
               </p>
               <p className="text-sm text-muted-foreground">Total Transactions</p>
             </div>
-            <div className="card-primary p-4 text-center">
+            <div className="card-premium p-4 text-center">
               <p className="text-lg font-bold text-brand-primary">
                 £{userTransactions.reduce((sum, tx) => sum + tx.gbpAmount, 0).toLocaleString()}
               </p>

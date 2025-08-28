@@ -1,5 +1,5 @@
 
-import { Header } from '@/components/layout/Header';
+import { TopNavigation } from '@/components/layout/TopNavigation';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -92,10 +92,10 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="page-container mobile-safe-area">
-      <Header title="Profile" />
+    <div className="min-h-screen bg-background">
+      <TopNavigation />
       
-      <main className="container-padding py-6 space-y-6">
+      <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
         {/* User Info Card */}
         <Card>
           <CardContent className="pt-6">

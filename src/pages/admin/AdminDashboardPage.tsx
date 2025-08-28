@@ -20,6 +20,8 @@ import AdminStatsGrid from '@/components/admin/AdminStatsGrid';
 import { useAdminActions } from '@/hooks/useAdminActions';
 import { useNotificationStore } from '@/store/notificationStore';
 import { CreateNotificationDialog } from '@/components/admin/CreateNotificationDialog';
+import { UserManagementDialog } from '@/components/admin/UserManagementDialog';
+import { SendNotificationDialog } from '@/components/admin/SendNotificationDialog';
 
 export default function AdminDashboardPage() {
   const { user } = useAuthStore();
@@ -79,7 +81,8 @@ export default function AdminDashboardPage() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <CreateNotificationDialog />
+              <UserManagementDialog />
+              <SendNotificationDialog />
               <Badge variant="outline" className="hidden sm:inline-flex">
                 {pendingCount.transactions + pendingCount.kyc} items need attention
               </Badge>
