@@ -88,21 +88,21 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
 
   return (
     <header className="sticky top-0 z-50 w-full bg-card border-b border-border">
-      <div className="flex h-16 items-center justify-between px-4 lg:px-6">
+      <div className="flex h-16 items-center justify-between px-4 lg:px-6 max-w-full overflow-hidden">
         {/* Left side - Logo and Navigation */}
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-6 min-w-0 flex-1">
           {/* Logo */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <div className="w-8 h-8 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl flex items-center justify-center">
               <span className="text-white font-bold text-sm">B</span>
             </div>
-            <h1 className="text-lg font-bold text-brand-primary hidden sm:block">BridgePay Admin</h1>
-            <h1 className="text-lg font-bold text-brand-primary sm:hidden">Admin</h1>
+            <h1 className="text-lg font-bold text-brand-primary hidden sm:block whitespace-nowrap">BridgePay Admin</h1>
+            <h1 className="text-lg font-bold text-brand-primary sm:hidden whitespace-nowrap">Admin</h1>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navigationItems.map((item) => {
+          <nav className="hidden lg:flex items-center gap-1 flex-1 min-w-0 overflow-x-auto">
+            <div className="flex items-center gap-1">{navigationItems.map((item) => {
               const isActive = location.pathname === item.path;
               return (
                 <Button
@@ -110,30 +110,31 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
                   variant={isActive ? "default" : "ghost"}
                   size="sm"
                   className={cn(
-                    'relative h-9 rounded-lg',
+                    'relative h-9 rounded-lg whitespace-nowrap',
                     isActive 
                       ? 'bg-brand-primary text-white shadow-sm' 
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   )}
                   onClick={() => handleNavigation(item.path)}
                 >
-                  <item.icon className="h-4 w-4 mr-2" />
+                  <item.icon className="h-4 w-4 mr-2 flex-shrink-0" />
                   <span className="font-medium">{item.label}</span>
                   {item.badge && (
-                    <Badge variant="destructive" className="ml-2 text-xs h-5 min-w-5 px-1">
+                    <Badge variant="destructive" className="ml-2 text-xs h-5 min-w-5 px-1 flex-shrink-0">
                       {item.badge > 99 ? '99+' : item.badge}
                     </Badge>
                   )}
                 </Button>
               );
             })}
+            </div>
           </nav>
 
           {/* Mobile Menu Button */}
           <Button
             variant="ghost"
             size="sm"
-            className="md:hidden p-2"
+            className="lg:hidden p-2 flex-shrink-0"
             onClick={() => setIsMobileMenuOpen(true)}
           >
             <Menu className="h-5 w-5" />
@@ -141,30 +142,29 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
         </div>
 
         {/* Right side - Actions and Profile */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-shrink-0">
           {/* Action Buttons - Hidden on small screens */}
-          <div className="hidden lg:flex items-center gap-2">
+          <div className="hidden xl:flex items-center gap-2">
             <UserManagementDialog />
             <SendNotificationDialog />
           </div>
 
-          {/* Quick Add Button - Mobile */}
+          {/* Quick Add Button - Mobile/Tablet */}
           <Button 
             size="sm" 
-            className="md:hidden btn-primary"
+            className="xl:hidden lg:inline-flex btn-primary"
             onClick={() => setIsMobileMenuOpen(true)}
           >
             <Plus className="h-4 w-4" />
           </Button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <ThemeToggle />
             <NotificationBell />
-            
             {/* Profile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full">
+                <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full flex-shrink-0">
                   <User className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -190,7 +190,7 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
 
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
+        <div className="lg:hidden fixed inset-0 z-50 bg-black/50" onClick={() => setIsMobileMenuOpen(false)}>
           <div className="fixed inset-y-0 left-0 w-80 bg-card border-r border-border" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between h-16 px-4 border-b border-border">
               <div className="flex items-center gap-3">
