@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { mockUsers } from '@/data/mockData';
-import { ArrowLeft, Search, User, Shield } from 'lucide-react';
+import { Search, User } from 'lucide-react';
+import AdminNavigation from '@/components/admin/AdminNavigation';
 
 export default function AdminUsersPage() {
   const navigate = useNavigate();
@@ -17,6 +18,12 @@ export default function AdminUsersPage() {
     user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const pendingCount = {
+    transactions: 0,
+    kyc: users.filter(u => u.kycStatus === 'under_review').length,
+    notifications: 0
+  };
 
   const getKYCStatusConfig = (status: string) => {
     switch (status) {
@@ -32,27 +39,21 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="page-container">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/admin/dashboard')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+    <div className="min-h-screen bg-background">
+      <AdminNavigation pendingCount={pendingCount} />
+      
+      <div className="px-4 lg:px-6 py-6">
+        {/* Page Header */}
+        <div className="mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">User Management</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-brand-primary">User Management</h1>
             <p className="text-sm text-muted-foreground">
               Manage user accounts and permissions
             </p>
           </div>
         </div>
-      </header>
 
-      <main className="container-padding py-6 space-y-6">
+        <main className="space-y-6">
         {/* Search */}
         <Card>
           <CardContent className="pt-6">
@@ -175,7 +176,8 @@ export default function AdminUsersPage() {
             </CardContent>
           </Card>
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

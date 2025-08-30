@@ -4,7 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { mockUsers } from '@/data/mockData';
-import { ArrowLeft, CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
+import AdminNavigation from '@/components/admin/AdminNavigation';
 
 export default function AdminKYCPage() {
   const navigate = useNavigate();
@@ -12,6 +13,12 @@ export default function AdminKYCPage() {
   const kycApplications = mockUsers.filter(user => 
     user.kycStatus === 'under_review' || user.kycStatus === 'pending'
   );
+
+  const pendingCount = {
+    transactions: 0,
+    kyc: kycApplications.length,
+    notifications: 0
+  };
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -25,27 +32,21 @@ export default function AdminKYCPage() {
   };
 
   return (
-    <div className="page-container">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/admin/dashboard')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+    <div className="min-h-screen bg-background">
+      <AdminNavigation pendingCount={pendingCount} />
+      
+      <div className="px-4 lg:px-6 py-6">
+        {/* Page Header */}
+        <div className="mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">KYC Management</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-brand-primary">KYC Management</h1>
             <p className="text-sm text-muted-foreground">
               Review KYC applications and documents
             </p>
           </div>
         </div>
-      </header>
 
-      <main className="container-padding py-6 space-y-6">
+        <main className="space-y-6">
         {/* KYC Applications */}
         <Card>
           <CardHeader>
@@ -137,7 +138,8 @@ export default function AdminKYCPage() {
             </CardContent>
           </Card>
         </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

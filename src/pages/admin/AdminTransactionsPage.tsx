@@ -7,7 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { mockTransactions } from '@/data/mockData';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { ArrowLeft, Search, Filter } from 'lucide-react';
+import { Search } from 'lucide-react';
+import AdminNavigation from '@/components/admin/AdminNavigation';
 
 export default function AdminTransactionsPage() {
   const navigate = useNavigate();
@@ -22,28 +23,28 @@ export default function AdminTransactionsPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const pendingCount = {
+    transactions: mockTransactions.filter(tx => tx.status === 'pending').length,
+    kyc: 0,
+    notifications: 0
+  };
+
   return (
-    <div className="page-container">
-      {/* Header */}
-      <header className="bg-card border-b border-border px-6 py-4">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate('/admin/dashboard')}
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+    <div className="min-h-screen bg-background">
+      <AdminNavigation pendingCount={pendingCount} />
+      
+      <div className="px-4 lg:px-6 py-6">
+        {/* Page Header */}
+        <div className="mb-6">
           <div>
-            <h1 className="text-xl font-semibold text-foreground">Transaction Management</h1>
+            <h1 className="text-2xl lg:text-3xl font-bold text-brand-primary">Transaction Management</h1>
             <p className="text-sm text-muted-foreground">
               Review and manage all transactions
             </p>
           </div>
         </div>
-      </header>
 
-      <main className="container-padding py-6 space-y-6">
+        <main className="space-y-6">
         {/* Filters */}
         <Card>
           <CardContent className="pt-6">
@@ -130,7 +131,8 @@ export default function AdminTransactionsPage() {
             </div>
           </CardContent>
         </Card>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

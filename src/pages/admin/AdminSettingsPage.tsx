@@ -36,30 +36,21 @@ export default function AdminSettingsPage() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <AdminNavigation pendingCount={pendingCount} />
       
-      <div className="flex-1 lg:ml-64 xl:ml-72 flex flex-col">
-        {/* Header */}
-        <header className="hidden lg:block bg-card border-b border-border px-4 lg:px-6 py-4">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate('/admin/dashboard')}
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-            <div>
-              <h1 className="text-xl font-semibold text-foreground">System Settings</h1>
-              <p className="text-sm text-muted-foreground">
-                Configure platform settings and limits
-              </p>
-            </div>
+      <div className="px-4 lg:px-6 py-6">
+        {/* Page Header */}
+        <div className="mb-6">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-brand-primary">System Settings</h1>
+            <p className="text-sm text-muted-foreground">
+              Configure platform settings and limits
+            </p>
           </div>
-        </header>
+        </div>
 
-        <main className="flex-1 p-4 lg:p-6 space-y-6 overflow-auto">
+        <main className="space-y-6">
           {/* Theme Settings */}
           <Card>
             <CardHeader>

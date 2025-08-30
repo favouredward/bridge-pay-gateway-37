@@ -66,23 +66,21 @@ export default function AdminDashboardPage() {
   } = useAdminActions();
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="min-h-screen bg-background">
       <AdminNavigation pendingCount={pendingCount} />
       
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64 xl:ml-72 flex flex-col">
-        {/* Page Header - Hidden on mobile as it's in navigation */}
-        <div className="hidden lg:block bg-card border-b border-border px-4 lg:px-6 py-4">
+      <div className="px-4 lg:px-6 py-6">
+        {/* Page Header */}
+        <div className="mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl lg:text-3xl font-bold text-brand-primary">Admin Dashboard</h1>
+              <h1 className="text-2xl lg:text-3xl font-bold text-brand-primary">Dashboard</h1>
               <p className="text-sm text-muted-foreground">
                 Welcome back, {user?.firstName}
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <UserManagementDialog />
-              <SendNotificationDialog />
               <Badge variant="outline" className="hidden sm:inline-flex">
                 {pendingCount.transactions + pendingCount.kyc} items need attention
               </Badge>
@@ -91,17 +89,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Main Content Area */}
-        <main className="flex-1 p-3 sm:p-4 lg:p-6 space-y-4 sm:space-y-6 overflow-auto">
-          {/* Mobile Page Title */}
-          <div className="lg:hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-brand-primary">Dashboard</h1>
-                <p className="text-sm text-muted-foreground">Welcome back, {user?.firstName}</p>
-              </div>
-              <CreateNotificationDialog />
-            </div>
-          </div>
+        <main className="space-y-6">
 
           {/* Urgent Notifications */}
           {notifications.some(n => n.urgent) && (
