@@ -1,20 +1,24 @@
-
-import { Transaction } from '@/types';
-import { StatusBadge } from '@/components/ui/status-badge';
-import { Copy, ExternalLink, ArrowRight, Clock, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import { ArrowRight, Copy, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { Transaction } from '@/types';
+import { UserTransaction } from '@/hooks/useUserData';
+import { cn } from '@/lib/utils';
 
 interface TransactionCardProps {
-  transaction: Transaction;
+  transaction: Transaction | UserTransaction;
   onClick?: () => void;
 }
 
 export function TransactionCard({ transaction, onClick }: TransactionCardProps) {
-  const copyToClipboard = (text: string, label: string) => {
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
-    toast.success(`${label} copied to clipboard`);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
   };
 
   const formatAmount = (amount: number) => {
@@ -24,144 +28,153 @@ export function TransactionCard({ transaction, onClick }: TransactionCardProps) 
     }).format(amount);
   };
 
-  const getStatusIcon = () => {
-    switch (transaction.status) {
+  const formatCrypto = (amount: number) => {
+    return `${amount.toFixed(2)} USDT`;
+  };
+
+  // Helper functions to safely access transaction properties
+  const getGbpAmount = () => 'gbpAmount' in transaction ? transaction.gbpAmount : transaction.gbp_amount;
+  const getUsdtAmount = () => 'usdtAmount' in transaction ? transaction.usdtAmount : transaction.usdt_amount;
+  const getPaymentReference = () => 'paymentReference' in transaction ? transaction.paymentReference : transaction.payment_reference;
+  const getWalletAddress = () => 'walletAddress' in transaction ? transaction.walletAddress : transaction.wallet_address;
+  const getTransactionHash = () => 'transactionHash' in transaction ? transaction.transactionHash : transaction.transaction_hash;
+  const getCreatedAt = () => 'createdAt' in transaction ? transaction.createdAt : transaction.created_at;
+  const getFees = () => 'fees' in transaction ? transaction.fees.totalFees : transaction.total_fees;
+
+  const getStatusConfig = (status: string) => {
+    switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
+      case 'usdt_sent':
+        return {
+          color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+          label: 'Completed',
+        };
       case 'pending':
-        return <Clock className="h-5 w-5 text-orange-500" />;
+        return {
+          color: 'bg-orange-500/10 text-orange-600 border-orange-500/20',
+          label: 'Pending',
+        };
+      case 'failed':
+        return {
+          color: 'bg-red-500/10 text-red-600 border-red-500/20',
+          label: 'Failed',
+        };
       default:
-        return <Clock className="h-5 w-5 text-blue-500" />;
+        return {
+          color: 'bg-gray-500/10 text-gray-600 border-gray-500/20',
+          label: status,
+        };
     }
   };
 
-  const getStatusGradient = () => {
-    switch (transaction.status) {
-      case 'completed':
-        return 'from-emerald-500/10 to-emerald-600/5 border-emerald-500/20';
-      case 'pending':
-        return 'from-orange-500/10 to-orange-600/5 border-orange-500/20';
-      case 'failed':
-        return 'from-red-500/10 to-red-600/5 border-red-500/20';
-      default:
-        return 'from-blue-500/10 to-blue-600/5 border-blue-500/20';
-    }
-  };
+  const statusConfig = getStatusConfig(transaction.status);
 
   return (
     <div
-      className="card-interactive p-6 space-y-4 group hover:shadow-2xl hover:shadow-black/5 bg-gradient-to-r from-surface-elevated to-surface-primary/50"
       onClick={onClick}
+      className={cn(
+        "card-premium p-4 md:p-6 space-y-4 cursor-pointer transition-all duration-200",
+        onClick && "hover:shadow-lg hover:scale-[1.02]"
+      )}
     >
-      {/* Header */}
-      <div className="flex justify-between items-start">
-        <div className="flex items-center gap-4">
-          <div className={`p-3 rounded-2xl bg-gradient-to-r ${getStatusGradient()} border`}>
-            {getStatusIcon()}
-          </div>
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <p className="font-bold text-foreground text-lg">
-                {formatAmount(transaction.gbpAmount)}
-              </p>
-              <ArrowRight className="h-4 w-4 text-muted-foreground" />
-              <p className="font-bold text-brand-secondary text-lg">
-                {transaction.usdtAmount} USDT
-              </p>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Rate: 1 GBP = {transaction.exchangeRate} USDT
-            </p>
-          </div>
-        </div>
-        <StatusBadge status={transaction.status} />
-      </div>
-
-      {/* Transaction Details Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pt-4 border-t border-border/50">
-        <div className="space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-muted-foreground">Reference:</span>
-            <div className="flex items-center gap-2">
-              <code className="text-sm font-mono bg-muted px-2 py-1 rounded-lg">
-                {transaction.paymentReference}
-              </code>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  copyToClipboard(transaction.paymentReference, 'Reference');
-                }}
-                className="p-1 h-auto hover:bg-brand-primary/10 hover:text-brand-primary"
-              >
-                <Copy className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-muted-foreground">Wallet:</span>
-            <div className="flex items-center gap-2">
-              <code className="text-sm font-mono bg-muted px-2 py-1 rounded-lg">
-                {`${transaction.walletAddress.slice(0, 6)}...${transaction.walletAddress.slice(-4)}`}
-              </code>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  copyToClipboard(transaction.walletAddress, 'Wallet address');
-                }}
-                className="p-1 h-auto hover:bg-brand-primary/10 hover:text-brand-primary"
-              >
-                <Copy className="h-3 w-3" />
-              </Button>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          {transaction.transactionHash && (
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-medium text-muted-foreground">Tx Hash:</span>
-              <div className="flex items-center gap-2">
-                <code className="text-sm font-mono bg-muted px-2 py-1 rounded-lg">
-                  {`${transaction.transactionHash.slice(0, 6)}...${transaction.transactionHash.slice(-4)}`}
-                </code>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    window.open(`https://etherscan.io/tx/${transaction.transactionHash}`, '_blank');
-                  }}
-                  className="p-1 h-auto hover:bg-brand-primary/10 hover:text-brand-primary"
-                >
-                  <ExternalLink className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm font-medium text-muted-foreground">Fees:</span>
-            <span className="text-sm font-semibold text-foreground">
-              £{transaction.fees.totalFees.toFixed(2)}
+      {/* Main Transaction Info */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-foreground text-base md:text-lg">
+              {formatAmount(getGbpAmount())}
+            </span>
+            <ArrowRight className="h-4 w-4 text-muted-foreground" />
+            <span className="font-bold text-foreground text-base md:text-lg">
+              {formatCrypto(getUsdtAmount())}
             </span>
           </div>
+          <div className="text-xs md:text-sm text-muted-foreground space-y-1">
+            <p>Ref: {getPaymentReference()}</p>
+            <p>{new Date(getCreatedAt()).toLocaleDateString()}</p>
+          </div>
+        </div>
+
+        <Badge className={cn("border text-xs font-semibold", statusConfig.color)}>
+          {statusConfig.label}
+        </Badge>
+      </div>
+
+      {/* Transaction Details */}
+      <div className="space-y-3 text-sm">
+        <div className="flex justify-between items-center">
+          <span className="text-muted-foreground font-medium">Payment Reference:</span>
+          <div className="flex items-center gap-2">
+            <code className="text-sm font-mono bg-muted px-2 py-1 rounded-lg">
+              {getPaymentReference()}
+            </code>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(getPaymentReference(), 'Reference');
+              }}
+              className="p-1 h-auto hover:bg-brand-primary/10 hover:text-brand-primary"
+            >
+              <Copy className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex justify-between items-center">
+          <span className="text-muted-foreground font-medium">Wallet Address:</span>
+          <div className="flex items-center gap-2">
+            <code className="text-sm font-mono bg-muted px-2 py-1 rounded-lg">
+              {`${getWalletAddress().slice(0, 6)}...${getWalletAddress().slice(-4)}`}
+            </code>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={(e) => {
+                e.stopPropagation();
+                copyToClipboard(getWalletAddress(), 'Wallet address');
+              }}
+              className="p-1 h-auto hover:bg-brand-primary/10 hover:text-brand-primary"
+            >
+              <Copy className="h-3 w-3" />
+            </Button>
+          </div>
+        </div>
+
+        {getTransactionHash() && (
+          <div className="flex justify-between items-center">
+            <span className="text-muted-foreground font-medium">Tx Hash:</span>
+            <div className="flex items-center gap-2">
+              <code className="text-sm font-mono bg-muted px-2 py-1 rounded-lg">
+                {`${getTransactionHash()!.slice(0, 6)}...${getTransactionHash()!.slice(-4)}`}
+              </code>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  window.open(`https://etherscan.io/tx/${getTransactionHash()}`, '_blank');
+                }}
+                className="p-1 h-auto hover:bg-brand-primary/10 hover:text-brand-primary"
+              >
+                <ExternalLink className="h-3 w-3" />
+              </Button>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between items-center">
+          <span className="text-muted-foreground font-medium">Fees:</span>
+          <span className="text-sm font-semibold text-foreground">
+            £{getFees().toFixed(2)}
+          </span>
         </div>
       </div>
 
-      {/* Footer */}
-      <div className="flex justify-between items-center pt-4 border-t border-border/50">
-        <p className="text-xs text-muted-foreground flex items-center gap-2">
-          <Clock className="h-3 w-3" />
-          {formatDistanceToNow(new Date(transaction.createdAt), { addSuffix: true })}
-        </p>
-        <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-          <ArrowRight className="h-4 w-4 text-brand-primary" />
-        </div>
+      {/* Timestamp */}
+      <div className="text-xs text-muted-foreground text-right border-t pt-2">
+        {formatDistanceToNow(new Date(getCreatedAt()), { addSuffix: true })}
       </div>
     </div>
   );

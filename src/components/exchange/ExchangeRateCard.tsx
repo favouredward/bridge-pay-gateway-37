@@ -1,172 +1,147 @@
-
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { TrendingUp, TrendingDown, RefreshCw } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { RefreshCw, TrendingUp, TrendingDown, Activity, Lock, AlertCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { getCurrentExchangeRate } from '@/data/mockData';
+import { supabase } from '@/integrations/supabase/client';
+
+interface ExchangeRate {
+  id: string;
+  from_currency: string;
+  to_currency: string;
+  rate: number;
+  timestamp: string;
+  source: string;
+}
 
 export function ExchangeRateCard() {
-  const [rate, setRate] = useState(getCurrentExchangeRate());
-  const [isLoading, setIsLoading] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(new Date());
-  const [trend, setTrend] = useState<'up' | 'down' | 'neutral'>('neutral');
-  const [isRateLocked, setIsRateLocked] = useState(false);
-  const [lockTimeRemaining, setLockTimeRemaining] = useState(0);
+  const [currentRate, setCurrentRate] = useState<ExchangeRate | null>(null);
+  const [previousRate, setPreviousRate] = useState<ExchangeRate | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const refreshRate = async () => {
-    setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      const newRate = getCurrentExchangeRate() + (Math.random() - 0.5) * 0.02;
-      const oldRate = rate;
-      setRate(Number(newRate.toFixed(4)));
-      setTrend(newRate > oldRate ? 'up' : newRate < oldRate ? 'down' : 'neutral');
-      setLastUpdated(new Date());
-      setIsLoading(false);
-    }, 1000);
-  };
+  const fetchExchangeRates = async () => {
+    try {
+      const { data: rates, error } = await supabase
+        .from('exchange_rates')
+        .select('*')
+        .eq('from_currency', 'GBP')
+        .eq('to_currency', 'USDT')
+        .order('timestamp', { ascending: false })
+        .limit(2);
 
-  const lockRate = () => {
-    setIsRateLocked(true);
-    setLockTimeRemaining(15 * 60); // 15 minutes in seconds
-  };
+      if (error) throw error;
 
-  useEffect(() => {
-    const interval = setInterval(refreshRate, 30000); // Auto-refresh every 30 seconds
-    return () => clearInterval(interval);
-  }, [rate]);
-
-  useEffect(() => {
-    let countdown: NodeJS.Timeout;
-    if (isRateLocked && lockTimeRemaining > 0) {
-      countdown = setInterval(() => {
-        setLockTimeRemaining(prev => {
-          if (prev <= 1) {
-            setIsRateLocked(false);
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
+      if (rates && rates.length > 0) {
+        setCurrentRate(rates[0]);
+        setPreviousRate(rates[1] || rates[0]);
+      } else {
+        const fallbackRate = {
+          id: 'fallback',
+          from_currency: 'GBP',
+          to_currency: 'USDT',
+          rate: 1.25,
+          timestamp: new Date().toISOString(),
+          source: 'system',
+        };
+        setCurrentRate(fallbackRate);
+        setPreviousRate(fallbackRate);
+      }
+    } catch (error) {
+      console.error('Error fetching exchange rates:', error);
+      const fallbackRate = {
+        id: 'fallback',
+        from_currency: 'GBP',
+        to_currency: 'USDT',
+        rate: 1.25,
+        timestamp: new Date().toISOString(),
+        source: 'system',
+      };
+      setCurrentRate(fallbackRate);
+      setPreviousRate(fallbackRate);
+    } finally {
+      setLoading(false);
     }
-    return () => clearInterval(countdown);
-  }, [isRateLocked, lockTimeRemaining]);
-
-  const getTrendIcon = () => {
-    if (trend === 'up') return <TrendingUp className="h-5 w-5 text-emerald-500" />;
-    if (trend === 'down') return <TrendingDown className="h-5 w-5 text-red-500" />;
-    return <Activity className="h-5 w-5 text-muted-foreground" />;
   };
 
-  const getTrendColor = () => {
-    if (trend === 'up') return 'text-emerald-500';
-    if (trend === 'down') return 'text-red-500';
-    return 'text-muted-foreground';
+  useEffect(() => {
+    fetchExchangeRates();
+  }, []);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await fetchExchangeRates();
+    setIsRefreshing(false);
   };
 
-  const formatTime = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
+  if (loading || !currentRate || !previousRate) {
+    return (
+      <Card className="h-32 flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Loading exchange rate...</div>
+      </Card>
+    );
+  }
+
+  const change = currentRate.rate - previousRate.rate;
+  const changePercent = previousRate.rate !== 0 ? ((change / previousRate.rate) * 100).toFixed(2) : '0.00';
+  const isPositive = change >= 0;
 
   return (
-    <div className="card-premium p-8 bg-gradient-to-br from-brand-primary/5 via-brand-secondary/5 to-surface-elevated relative overflow-hidden">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute inset-0 bg-gradient-to-br from-brand-primary/10 to-brand-secondary/10"></div>
-      </div>
-
-      <div className="relative z-10">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-xl">
-                <Activity className="h-5 w-5 text-white" />
-              </div>
-              <h3 className="text-lg font-bold text-foreground">Live Exchange Rate</h3>
-            </div>
-            
-            <div className="flex items-center gap-4 mb-4">
-              <div className="flex items-center gap-3">
-                <p className={`text-4xl font-bold ${getTrendColor()}`}>
-                  1 GBP = {rate} USDT
-                </p>
-                {getTrendIcon()}
-              </div>
-            </div>
-
-            {isRateLocked ? (
-              <div className="flex items-center gap-2 p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl">
-                <Lock className="h-4 w-4 text-emerald-500" />
-                <span className="text-emerald-600 font-semibold text-sm">
-                  Rate locked for {formatTime(lockTimeRemaining)}
-                </span>
-              </div>
+    <Card className="overflow-hidden bg-gradient-to-r from-emerald-500/5 to-blue-500/5 border-emerald-500/10">
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+            💱 Live Exchange Rate
+          </CardTitle>
+          <Badge variant={isPositive ? "default" : "destructive"} className="flex items-center gap-1">
+            {isPositive ? (
+              <TrendingUp className="h-3 w-3" />
             ) : (
-              <div className="flex items-center gap-2 text-muted-foreground text-sm">
-                <div className="w-2 h-2 bg-brand-secondary rounded-full animate-pulse"></div>
-                <span>Last updated: {lastUpdated.toLocaleTimeString()}</span>
-              </div>
+              <TrendingDown className="h-3 w-3" />
             )}
-          </div>
-
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={refreshRate}
-              disabled={isLoading}
-              className="p-3 hover:bg-brand-primary/10 hover:text-brand-primary"
-            >
-              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            </Button>
+            {isPositive ? '+' : ''}{changePercent}%
+          </Badge>
+        </div>
+      </CardHeader>
+      
+      <CardContent>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <div className="text-3xl font-bold text-foreground">
+                1 GBP = {currentRate.rate.toFixed(4)} USDT
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Updated: {new Date(currentRate.timestamp).toLocaleTimeString()}
+              </div>
+            </div>
             
-            {!isRateLocked && (
-              <Button
-                size="sm"
-                onClick={lockRate}
-                className="btn-secondary text-sm px-4 py-2 h-auto"
-              >
-                <Lock className="h-3 w-3 mr-1" />
-                Lock Rate
-              </Button>
-            )}
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2 hover:bg-muted rounded-full transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
           </div>
-        </div>
-
-        {/* Rate Comparison */}
-        <div className="border-t border-border/50 pt-6">
-          <div className="grid grid-cols-3 gap-4">
+          
+          <div className="grid grid-cols-3 gap-4 pt-4 border-t border-border">
             <div className="text-center">
-              <div className="text-sm text-muted-foreground mb-1">24h High</div>
-              <div className="font-bold text-emerald-500">{(rate + 0.05).toFixed(4)}</div>
+              <div className="text-sm text-muted-foreground">Previous</div>
+              <div className="font-semibold">{previousRate.rate.toFixed(4)}</div>
             </div>
             <div className="text-center">
-              <div className="text-sm text-muted-foreground mb-1">24h Low</div>
-              <div className="font-bold text-red-500">{(rate - 0.03).toFixed(4)}</div>
-            </div>
-            <div className="text-center">
-              <div className="text-sm text-muted-foreground mb-1">24h Change</div>
-              <div className={`font-bold flex items-center justify-center gap-1 ${getTrendColor()}`}>
-                {trend === 'up' ? '+' : trend === 'down' ? '-' : ''}0.{Math.floor(Math.random() * 50)}%
-                {getTrendIcon()}
+              <div className="text-sm text-muted-foreground">Change</div>
+              <div className={`font-semibold ${isPositive ? 'text-emerald-500' : 'text-red-500'}`}>
+                {isPositive ? '+' : ''}{change.toFixed(4)}
               </div>
             </div>
+            <div className="text-center">
+              <div className="text-sm text-muted-foreground">Source</div>
+              <div className="font-semibold capitalize">{currentRate.source}</div>
+            </div>
           </div>
         </div>
-
-        {/* Market Status */}
-        <div className="flex items-center justify-between mt-6 p-4 bg-gradient-to-r from-muted/30 to-muted/10 rounded-2xl">
-          <div className="flex items-center gap-3">
-            <div className="w-3 h-3 bg-emerald-500 rounded-full animate-pulse"></div>
-            <span className="font-semibold text-foreground">Market Open</span>
-          </div>
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <AlertCircle className="h-4 w-4" />
-            <span>Rates update every 30s</span>
-          </div>
-        </div>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -6,8 +6,9 @@ import { ExchangeRateCard } from '@/components/exchange/ExchangeRateCard';
 import { TransactionCard } from '@/components/transactions/TransactionCard';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-import { mockTransactions } from '@/data/mockData';
-import { Send, History, CreditCard, ArrowUpRight, TrendingUp, DollarSign, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { useUserData } from '@/hooks/useUserData';
+import { Send, History, CreditCard, ArrowUpRight, TrendingUp, DollarSign, Clock, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
@@ -97,19 +98,54 @@ export default function DashboardPage() {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Get user's recent transactions
-  const userTransactions = mockTransactions
-    .filter(tx => tx.userId === user?.id)
-    .slice(0, 3);
+  const {
+    transactions,
+    stats,
+    exchangeRate,
+    loading,
+    error,
+    refetch,
+  } = useUserData();
 
   const kycConfig = getKYCStatusConfig(user?.kycStatus || 'pending');
   const StatusIcon = kycConfig.icon;
 
-  // Calculate user stats
-  const totalTransactions = userTransactions.length;
-  const totalAmount = userTransactions.reduce((sum, tx) => sum + tx.gbpAmount, 0);
-  const completedTransactions = userTransactions.filter(tx => tx.status === 'completed').length;
-  const pendingTransactions = userTransactions.filter(tx => tx.status === 'pending').length;
+  // Get recent transactions for display
+  const userTransactions = transactions.slice(0, 3);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <TopNavigation />
+        <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
+          <LoadingSkeleton />
+        </main>
+        {isMobile && <BottomNavigation />}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <TopNavigation />
+        <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
+          <div className="card-premium p-8 text-center space-y-4">
+            <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Error Loading Dashboard</h3>
+              <p className="text-muted-foreground">{error}</p>
+            </div>
+            <Button onClick={refetch} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+          </div>
+        </main>
+        {isMobile && <BottomNavigation />}
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -164,7 +200,7 @@ export default function DashboardPage() {
               <span className="text-xs md:text-sm text-muted-foreground font-medium">Total Sent</span>
             </div>
             <p className="text-lg md:text-2xl font-bold text-foreground">
-              £{totalAmount.toLocaleString()}
+              £{stats.totalAmount.toLocaleString()}
             </p>
           </div>
 
@@ -175,7 +211,7 @@ export default function DashboardPage() {
               </div>
               <span className="text-xs md:text-sm text-muted-foreground font-medium">Completed</span>
             </div>
-            <p className="text-lg md:text-2xl font-bold text-foreground">{completedTransactions}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground">{stats.completedTransactions}</p>
           </div>
 
           <div className="stat-card">
@@ -185,7 +221,7 @@ export default function DashboardPage() {
               </div>
               <span className="text-xs md:text-sm text-muted-foreground font-medium">Pending</span>
             </div>
-            <p className="text-lg md:text-2xl font-bold text-foreground">{pendingTransactions}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground">{stats.pendingTransactions}</p>
           </div>
 
           <div className="stat-card">
@@ -195,7 +231,7 @@ export default function DashboardPage() {
               </div>
               <span className="text-xs md:text-sm text-muted-foreground font-medium">This Month</span>
             </div>
-            <p className="text-lg md:text-2xl font-bold text-foreground">{totalTransactions}</p>
+            <p className="text-lg md:text-2xl font-bold text-foreground">{stats.thisMonthTransactions}</p>
           </div>
         </div>
 
@@ -284,28 +320,26 @@ export default function DashboardPage() {
               <TrendingUp className="h-5 w-5 md:h-6 md:w-6 text-brand-secondary" />
               Your Performance
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
-                  {((completedTransactions / totalTransactions) * 100).toFixed(0)}%
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
+                    {stats.successRate.toFixed(0)}%
+                  </div>
+                  <div className="text-muted-foreground font-medium text-sm md:text-base">Success Rate</div>
                 </div>
-                <div className="text-muted-foreground font-medium text-sm md:text-base">Success Rate</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
-                  £{(totalAmount / totalTransactions || 0).toLocaleString()}
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
+                    £{stats.averageAmount.toLocaleString()}
+                  </div>
+                  <div className="text-muted-foreground font-medium text-sm md:text-base">Average Transfer</div>
                 </div>
-                <div className="text-muted-foreground font-medium text-sm md:text-base">Average Transfer</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
-                  {userTransactions.filter(tx => 
-                    new Date(tx.createdAt) > new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-                  ).length}
+                <div className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
+                    {stats.thisMonthTransactions}
+                  </div>
+                  <div className="text-muted-foreground font-medium text-sm md:text-base">This Month</div>
                 </div>
-                <div className="text-muted-foreground font-medium text-sm md:text-base">This Month</div>
               </div>
-            </div>
           </div>
         )}
       </main>
