@@ -229,12 +229,22 @@ export function useAdminData() {
     setError(null);
     
     try {
-      await Promise.all([
+      // Batch all queries for better performance
+      const [statsResult, transactionsResult, usersResult, kycResult] = await Promise.allSettled([
         fetchStats(),
-        fetchTransactions(),
+        fetchTransactions(), 
         fetchUsers(),
         fetchKYCDocuments(),
       ]);
+
+      // Log any failed requests but don't stop execution
+      const results = [statsResult, transactionsResult, usersResult, kycResult];
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          console.warn(`Admin data fetch ${index} failed:`, result.reason);
+        }
+      });
+
     } catch (err) {
       console.error('Error fetching admin data:', err);
       setError('Failed to fetch admin data');

@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Copy, Clock, CheckCircle } from 'lucide-react';
 import { generatePaymentReference, getCurrentExchangeRate } from '@/data/mockData';
 import { useAuthStore } from '@/store/authStore';
+import { supabase } from '@/integrations/supabase/client';
 
 type Step = 'amount' | 'recipient' | 'payment' | 'confirmation';
 
@@ -120,10 +121,40 @@ export default function SendMoneyPage() {
     toast.success(`${label} copied to clipboard`);
   };
 
-  const handleSubmitTransaction = () => {
-    // Create transaction and redirect to tracking
-    toast.success('Transaction created successfully!');
-    navigate('/history');
+  const handleSubmitTransaction = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('transactions')
+        .insert([
+          {
+            user_id: user?.id,
+            gbp_amount: formData.gbpAmount,
+            usdt_amount: formData.usdtAmount,
+            exchange_rate: getCurrentExchangeRate(),
+            wallet_address: formData.walletAddress,
+            status: 'pending',
+            payment_reference: formData.paymentReference,
+            payment_deadline: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+            bridge_pay_fee: formData.gbpAmount * 0.025,
+            network_fee: 1,
+            total_fees: formData.gbpAmount * 0.025 + 1,
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Transaction creation error:', error);
+        toast.error('Failed to create transaction. Please try again.');
+        return;
+      }
+
+      toast.success('Transaction created successfully!');
+      navigate(`/transactions/${data.id}`);
+    } catch (err) {
+      console.error('Unexpected error creating transaction:', err);
+      toast.error('Failed to create transaction. Please try again.');
+    }
   };
 
   const renderStepContent = () => {

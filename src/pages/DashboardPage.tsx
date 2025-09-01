@@ -101,7 +101,6 @@ export default function DashboardPage() {
   const {
     transactions,
     stats,
-    exchangeRate,
     loading,
     error,
     refetch,
@@ -200,7 +199,7 @@ export default function DashboardPage() {
               <span className="text-xs md:text-sm text-muted-foreground font-medium">Total Sent</span>
             </div>
             <p className="text-lg md:text-2xl font-bold text-foreground">
-              £{stats.totalAmount.toLocaleString()}
+              £{stats.totalSent.toLocaleString()}
             </p>
           </div>
 
@@ -329,7 +328,7 @@ export default function DashboardPage() {
                 </div>
                 <div className="text-center">
                   <div className="text-2xl md:text-3xl font-bold gradient-text mb-2">
-                    £{stats.averageAmount.toLocaleString()}
+                    £{stats.averageTransfer.toLocaleString()}
                   </div>
                   <div className="text-muted-foreground font-medium text-sm md:text-base">Average Transfer</div>
                 </div>
