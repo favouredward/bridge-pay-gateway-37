@@ -3,22 +3,57 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { mockUsers } from '@/data/mockData';
-import { CheckCircle, XCircle, Clock, Eye } from 'lucide-react';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { CheckCircle, XCircle, Clock, Eye, AlertTriangle, RefreshCw } from 'lucide-react';
 import AdminNavigation from '@/components/admin/AdminNavigation';
+import { useAdminData } from '@/hooks/useAdminData';
 
 export default function AdminKYCPage() {
   const navigate = useNavigate();
+  const { users, kycDocuments, loading, error, refetch, stats, approveKYC, rejectKYC } = useAdminData();
 
-  const kycApplications = mockUsers.filter(user => 
-    user.kycStatus === 'under_review' || user.kycStatus === 'pending'
+  const kycApplications = users.filter(user => 
+    user.kyc_status === 'under_review' || user.kyc_status === 'pending'
   );
 
   const pendingCount = {
-    transactions: 0,
-    kyc: kycApplications.length,
+    transactions: stats.pendingTransactions,
+    kyc: stats.pendingKYC,
     notifications: 0
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AdminNavigation pendingCount={pendingCount} />
+        <div className="px-4 lg:px-6 py-6">
+          <LoadingSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AdminNavigation pendingCount={pendingCount} />
+        <div className="px-4 lg:px-6 py-6">
+          <div className="card-premium p-8 text-center space-y-4">
+            <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Error Loading KYC Data</h3>
+              <p className="text-muted-foreground">{error}</p>
+            </div>
+            <Button onClick={refetch} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -26,6 +61,10 @@ export default function AdminKYCPage() {
         return { icon: Clock, color: 'text-brand-warning', bg: 'bg-brand-warning/10' };
       case 'pending':
         return { icon: Clock, color: 'text-muted-foreground', bg: 'bg-muted/50' };
+      case 'verified':
+        return { icon: CheckCircle, color: 'text-brand-success', bg: 'bg-brand-success/10' };
+      case 'rejected':
+        return { icon: XCircle, color: 'text-brand-error', bg: 'bg-brand-error/10' };
       default:
         return { icon: Clock, color: 'text-muted-foreground', bg: 'bg-muted/50' };
     }
@@ -58,7 +97,7 @@ export default function AdminKYCPage() {
             <div className="space-y-4">
               {kycApplications.length > 0 ? (
                 kycApplications.map((user) => {
-                  const status = getStatusConfig(user.kycStatus);
+                  const status = getStatusConfig(user.kyc_status);
                   const StatusIcon = status.icon;
                   
                   return (
@@ -66,35 +105,49 @@ export default function AdminKYCPage() {
                       <div className="flex justify-between items-start mb-3">
                         <div>
                           <p className="font-semibold text-foreground">
-                            {user.firstName} {user.lastName}
+                            {user.first_name} {user.last_name}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {user.email}
+                            {user.user_id}
                           </p>
                         </div>
                         <div className={`flex items-center gap-2 px-3 py-1 rounded-full ${status.bg}`}>
                           <StatusIcon className={`h-4 w-4 ${status.color}`} />
                           <span className={`text-sm font-medium ${status.color}`}>
-                            {user.kycStatus.replace('_', ' ')}
+                            {user.kyc_status.replace('_', ' ')}
                           </span>
                         </div>
                       </div>
                       
                       <div className="text-sm text-muted-foreground mb-4">
-                        <p>Submitted: {new Date(user.createdAt).toLocaleDateString()}</p>
+                        <p>Submitted: {new Date(user.created_at).toLocaleDateString()}</p>
                         {user.phone && <p>Phone: {user.phone}</p>}
                       </div>
 
                       <div className="flex gap-2">
-                        <Button size="sm" variant="outline" className="flex items-center gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="flex items-center gap-2"
+                          onClick={() => navigate(`/admin/users/${user.id}`)}
+                        >
                           <Eye className="h-4 w-4" />
                           Review Documents
                         </Button>
-                        <Button size="sm" className="btn-primary flex items-center gap-2">
+                        <Button 
+                          size="sm" 
+                          className="btn-primary flex items-center gap-2"
+                          onClick={() => approveKYC(user.id)}
+                        >
                           <CheckCircle className="h-4 w-4" />
                           Approve
                         </Button>
-                        <Button size="sm" variant="outline" className="text-brand-error border-brand-error hover:bg-brand-error hover:text-white flex items-center gap-2">
+                        <Button 
+                          size="sm" 
+                          variant="outline" 
+                          className="text-brand-error border-brand-error hover:bg-brand-error hover:text-white flex items-center gap-2"
+                          onClick={() => rejectKYC(user.id, 'Documents insufficient')}
+                        >
                           <XCircle className="h-4 w-4" />
                           Reject
                         </Button>
@@ -121,22 +174,22 @@ export default function AdminKYCPage() {
               <p className="text-sm text-muted-foreground">Pending Review</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-brand-success">
-                {mockUsers.filter(u => u.kycStatus === 'verified').length}
-              </p>
-              <p className="text-sm text-muted-foreground">Verified</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-brand-error">
-                {mockUsers.filter(u => u.kycStatus === 'rejected').length}
-              </p>
-              <p className="text-sm text-muted-foreground">Rejected</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-2xl font-bold text-brand-success">
+                  {users.filter(u => u.kyc_status === 'verified').length}
+                </p>
+                <p className="text-sm text-muted-foreground">Verified</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-2xl font-bold text-brand-error">
+                  {users.filter(u => u.kyc_status === 'rejected').length}
+                </p>
+                <p className="text-sm text-muted-foreground">Rejected</p>
+              </CardContent>
+            </Card>
         </div>
         </main>
       </div>

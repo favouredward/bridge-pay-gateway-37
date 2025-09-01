@@ -4,26 +4,60 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { mockUsers } from '@/data/mockData';
-import { Search, User } from 'lucide-react';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Search, User, AlertTriangle, RefreshCw } from 'lucide-react';
 import AdminNavigation from '@/components/admin/AdminNavigation';
+import { useAdminData } from '@/hooks/useAdminData';
 
 export default function AdminUsersPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
+  const { users: allUsers, loading, error, refetch, stats } = useAdminData();
 
-  const users = mockUsers.filter(user => user.role === 'user');
+  const users = allUsers.filter(user => user.role === 'user');
   const filteredUsers = users.filter(user =>
-    user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.last_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const pendingCount = {
-    transactions: 0,
-    kyc: users.filter(u => u.kycStatus === 'under_review').length,
+    transactions: stats.pendingTransactions,
+    kyc: stats.pendingKYC,
     notifications: 0
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AdminNavigation pendingCount={pendingCount} />
+        <div className="px-4 lg:px-6 py-6">
+          <LoadingSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AdminNavigation pendingCount={pendingCount} />
+        <div className="px-4 lg:px-6 py-6">
+          <div className="card-premium p-8 text-center space-y-4">
+            <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Error Loading Users</h3>
+              <p className="text-muted-foreground">{error}</p>
+            </div>
+            <Button onClick={refetch} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const getKYCStatusConfig = (status: string) => {
     switch (status) {
@@ -79,7 +113,7 @@ export default function AdminUsersPage() {
           <CardContent>
             <div className="space-y-4">
               {filteredUsers.map((user) => {
-                const kycStatus = getKYCStatusConfig(user.kycStatus);
+                const kycStatus = getKYCStatusConfig(user.kyc_status);
                 
                 return (
                   <div key={user.id} className="border border-border rounded-lg p-4">
@@ -90,10 +124,10 @@ export default function AdminUsersPage() {
                         </div>
                         <div>
                           <p className="font-semibold text-foreground">
-                            {user.firstName} {user.lastName}
+                            {user.first_name} {user.last_name}
                           </p>
                           <p className="text-sm text-muted-foreground">
-                            {user.email}
+                            {user.user_id}
                           </p>
                         </div>
                       </div>
@@ -107,11 +141,11 @@ export default function AdminUsersPage() {
                     <div className="grid grid-cols-2 gap-4 text-sm mb-4">
                       <div>
                         <span className="text-muted-foreground">Joined:</span>{' '}
-                        {new Date(user.createdAt).toLocaleDateString()}
+                        {new Date(user.created_at).toLocaleDateString()}
                       </div>
                       <div>
                         <span className="text-muted-foreground">Last Login:</span>{' '}
-                        {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : 'Never'}
+                        {user.last_login ? new Date(user.last_login).toLocaleDateString() : 'Never'}
                       </div>
                       {user.phone && (
                         <div>
@@ -122,14 +156,26 @@ export default function AdminUsersPage() {
                     </div>
 
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => navigate(`/admin/users/${user.id}`)}
+                      >
                         View Profile
                       </Button>
-                      <Button size="sm" variant="outline">
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => navigate(`/admin/transactions?user=${user.id}`)}
+                      >
                         View Transactions
                       </Button>
-                      {user.kycStatus !== 'verified' && (
-                        <Button size="sm" className="btn-primary">
+                      {user.kyc_status !== 'verified' && (
+                        <Button 
+                          size="sm" 
+                          className="btn-primary"
+                          onClick={() => navigate(`/admin/kyc/${user.id}`)}
+                        >
                           Review KYC
                         </Button>
                       )}
@@ -151,30 +197,30 @@ export default function AdminUsersPage() {
               <p className="text-sm text-muted-foreground">Total Users</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-brand-success">
-                {users.filter(u => u.kycStatus === 'verified').length}
-              </p>
-              <p className="text-sm text-muted-foreground">Verified</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-brand-warning">
-                {users.filter(u => u.kycStatus === 'under_review').length}
-              </p>
-              <p className="text-sm text-muted-foreground">Under Review</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6 text-center">
-              <p className="text-2xl font-bold text-brand-primary">
-                {users.filter(u => u.lastLogin && new Date(u.lastLogin) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
-              </p>
-              <p className="text-sm text-muted-foreground">Active This Week</p>
-            </CardContent>
-          </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-2xl font-bold text-brand-success">
+                  {users.filter(u => u.kyc_status === 'verified').length}
+                </p>
+                <p className="text-sm text-muted-foreground">Verified</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-2xl font-bold text-brand-warning">
+                  {users.filter(u => u.kyc_status === 'under_review').length}
+                </p>
+                <p className="text-sm text-muted-foreground">Under Review</p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="pt-6 text-center">
+                <p className="text-2xl font-bold text-brand-primary">
+                  {users.filter(u => u.last_login && new Date(u.last_login) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
+                </p>
+                <p className="text-sm text-muted-foreground">Active This Week</p>
+              </CardContent>
+            </Card>
         </div>
         </main>
       </div>

@@ -5,29 +5,64 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { mockTransactions } from '@/data/mockData';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { Search } from 'lucide-react';
+import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
+import { EmptyState } from '@/components/ui/empty-state';
+import { Search, AlertTriangle, RefreshCw } from 'lucide-react';
 import AdminNavigation from '@/components/admin/AdminNavigation';
+import { useAdminData } from '@/hooks/useAdminData';
 
 export default function AdminTransactionsPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const { transactions, loading, error, refetch, stats, approveTransaction, rejectTransaction } = useAdminData();
 
-  const filteredTransactions = mockTransactions.filter(transaction => {
-    const matchesSearch = transaction.paymentReference.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         transaction.walletAddress.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredTransactions = transactions.filter(transaction => {
+    const matchesSearch = transaction.payment_reference.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         transaction.wallet_address.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || transaction.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
 
   const pendingCount = {
-    transactions: mockTransactions.filter(tx => tx.status === 'pending').length,
-    kyc: 0,
+    transactions: stats.pendingTransactions,
+    kyc: stats.pendingKYC,
     notifications: 0
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AdminNavigation pendingCount={pendingCount} />
+        <div className="px-4 lg:px-6 py-6">
+          <LoadingSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <AdminNavigation pendingCount={pendingCount} />
+        <div className="px-4 lg:px-6 py-6">
+          <div className="card-premium p-8 text-center space-y-4">
+            <AlertTriangle className="h-12 w-12 text-destructive mx-auto" />
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Error Loading Transactions</h3>
+              <p className="text-muted-foreground">{error}</p>
+            </div>
+            <Button onClick={refetch} variant="outline">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -89,40 +124,61 @@ export default function AdminTransactionsPage() {
                   <div className="flex justify-between items-start mb-3">
                     <div>
                       <p className="font-semibold text-foreground">
-                        £{transaction.gbpAmount} → {transaction.usdtAmount} USDT
+                        £{transaction.gbp_amount} → {transaction.usdt_amount} USDT
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {transaction.paymentReference}
+                        {transaction.payment_reference}
                       </p>
                     </div>
-                    <StatusBadge status={transaction.status} />
+                    <StatusBadge status={transaction.status as any} />
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-muted-foreground">Wallet:</span>{' '}
                       <span className="font-mono">
-                        {transaction.walletAddress.slice(0, 8)}...{transaction.walletAddress.slice(-6)}
+                        {transaction.wallet_address.slice(0, 8)}...{transaction.wallet_address.slice(-6)}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground">Created:</span>{' '}
-                      {new Date(transaction.createdAt).toLocaleDateString()}
+                      {new Date(transaction.created_at).toLocaleDateString()}
                     </div>
                   </div>
 
                   <div className="flex gap-2 mt-4">
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => navigate(`/admin/transactions/${transaction.id}`)}
+                    >
                       View Details
                     </Button>
                     {transaction.status === 'pending' && (
-                      <Button size="sm" className="btn-primary">
-                        Confirm Payment
+                      <Button 
+                        size="sm" 
+                        className="btn-primary"
+                        onClick={() => approveTransaction(transaction.id)}
+                      >
+                        Approve Transaction
                       </Button>
                     )}
                     {transaction.status === 'payment_received' && (
-                      <Button size="sm" className="btn-secondary">
+                      <Button 
+                        size="sm" 
+                        className="btn-secondary"
+                        onClick={() => approveTransaction(transaction.id)}
+                      >
                         Send USDT
+                      </Button>
+                    )}
+                    {(transaction.status === 'pending' || transaction.status === 'payment_received') && (
+                      <Button 
+                        size="sm" 
+                        variant="destructive"
+                        onClick={() => rejectTransaction(transaction.id, 'Rejected by admin')}
+                      >
+                        Reject
                       </Button>
                     )}
                   </div>
