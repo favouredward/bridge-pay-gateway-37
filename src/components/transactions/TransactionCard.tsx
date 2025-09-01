@@ -37,7 +37,7 @@ export function TransactionCard({ transaction, onClick }: TransactionCardProps) 
   const getUsdtAmount = () => 'usdtAmount' in transaction ? transaction.usdtAmount : transaction.usdt_amount;
   const getPaymentReference = () => 'paymentReference' in transaction ? transaction.paymentReference : transaction.payment_reference;
   const getWalletAddress = () => 'walletAddress' in transaction ? transaction.walletAddress : transaction.wallet_address;
-  const getTransactionHash = () => 'transactionHash' in transaction ? transaction.transactionHash : transaction.transaction_hash;
+  const getTransactionHash = () => 'transactionHash' in transaction ? transaction.transactionHash : (transaction as any).transaction_hash;
   const getCreatedAt = () => 'createdAt' in transaction ? transaction.createdAt : transaction.created_at;
   const getFees = () => 'fees' in transaction ? transaction.fees.totalFees : transaction.total_fees;
 

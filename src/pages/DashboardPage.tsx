@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { LoadingSkeleton } from '@/components/ui/loading-skeleton';
 import { useUserData } from '@/hooks/useUserData';
-import { Send, History, CreditCard, ArrowUpRight, TrendingUp, DollarSign, Clock, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, RefreshCw, ArrowRight, TrendingUp, DollarSign, Activity, Clock, Send, History, CreditCard, ArrowUpRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
