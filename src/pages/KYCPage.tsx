@@ -9,10 +9,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useAuthStore } from '@/store/authStore';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Upload, CheckCircle, Clock, XCircle } from 'lucide-react';
 
-type KYCStep = 'personal' | 'documents' | 'verification' | 'complete';
+type KYCStep = 'personal' | 'documents' | 'complete';
 
 export default function KYCPage() {
   const navigate = useNavigate();
@@ -24,24 +25,21 @@ export default function KYCPage() {
       lastName: user?.lastName || '',
       dateOfBirth: '',
       nationality: 'British',
+      phone: user?.phone || '',
       address: {
         street: '',
         city: '',
-        postalCode: '',
         country: 'United Kingdom',
       },
     },
     documents: {
-      idDocument: null as File | null,
-      utilityBill: null as File | null,
-      facePhoto: null as File | null,
+      driversLicense: null as File | null,
     },
   });
 
   const steps = [
     { id: 'personal', title: 'Personal Info', description: 'Basic information' },
     { id: 'documents', title: 'Documents', description: 'Upload documents' },
-    { id: 'verification', title: 'Verification', description: 'Face verification' },
     { id: 'complete', title: 'Complete', description: 'Review and submit' },
   ];
 
@@ -146,8 +144,6 @@ export default function KYCPage() {
       setCurrentStep('documents');
     } else if (currentStep === 'documents') {
       if (!validateDocuments()) return;
-      setCurrentStep('verification');
-    } else if (currentStep === 'verification') {
       setCurrentStep('complete');
     } else if (currentStep === 'complete') {
       handleSubmit();
@@ -156,11 +152,11 @@ export default function KYCPage() {
 
   const validatePersonalInfo = () => {
     const { personalInfo } = formData;
-    if (!personalInfo.firstName || !personalInfo.lastName || !personalInfo.dateOfBirth) {
+    if (!personalInfo.firstName || !personalInfo.lastName || !personalInfo.dateOfBirth || !personalInfo.phone) {
       toast.error('Please fill in all required fields');
       return false;
     }
-    if (!personalInfo.address.street || !personalInfo.address.city || !personalInfo.address.postalCode) {
+    if (!personalInfo.address.street || !personalInfo.address.city) {
       toast.error('Please complete your address information');
       return false;
     }
@@ -169,8 +165,8 @@ export default function KYCPage() {
 
   const validateDocuments = () => {
     const { documents } = formData;
-    if (!documents.idDocument || !documents.utilityBill) {
-      toast.error('Please upload all required documents');
+    if (!documents.driversLicense) {
+      toast.error('Please upload your driver\'s license');
       return false;
     }
     return true;
@@ -188,13 +184,41 @@ export default function KYCPage() {
 
   const handleSubmit = async () => {
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!user?.id) {
+        toast.error('Please sign in to continue');
+        return;
+      }
+
+      // Create KYC document record in database
+      const { error } = await supabase
+        .from('kyc_documents')
+        .insert([
+          {
+            user_id: user.id,
+            document_type: 'drivers_license',
+            document_url: `kyc_documents/${user.id}_drivers_license_${Date.now()}.jpg`,
+            status: 'pending',
+          }
+        ]);
+
+      if (error) throw error;
+
+      // Update user profile status
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({ 
+          kyc_status: 'under_review',
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', user.id);
+
+      if (profileError) throw profileError;
       
       updateUser({ kycStatus: 'under_review' });
       toast.success('KYC documents submitted successfully!');
       navigate('/dashboard');
     } catch (error) {
+      console.error('KYC submission error:', error);
       toast.error('Failed to submit KYC documents');
     }
   };
@@ -275,43 +299,39 @@ export default function KYCPage() {
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label className="form-label">City</Label>
-                    <Input
-                      value={formData.personalInfo.address.city}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        personalInfo: {
-                          ...prev.personalInfo,
-                          address: {
-                            ...prev.personalInfo.address,
-                            city: e.target.value,
-                          },
+                <div>
+                  <Label className="form-label">Phone Number</Label>
+                  <Input
+                    value={formData.personalInfo.phone}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      personalInfo: {
+                        ...prev.personalInfo,
+                        phone: e.target.value,
+                      },
+                    }))}
+                    className="form-input"
+                    placeholder="+44 20 1234 5678"
+                  />
+                </div>
+
+                <div>
+                  <Label className="form-label">City</Label>
+                  <Input
+                    value={formData.personalInfo.address.city}
+                    onChange={(e) => setFormData(prev => ({
+                      ...prev,
+                      personalInfo: {
+                        ...prev.personalInfo,
+                        address: {
+                          ...prev.personalInfo.address,
+                          city: e.target.value,
                         },
-                      }))}
-                      className="form-input"
-                      placeholder="London"
-                    />
-                  </div>
-                  <div>
-                    <Label className="form-label">Postal Code</Label>
-                    <Input
-                      value={formData.personalInfo.address.postalCode}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        personalInfo: {
-                          ...prev.personalInfo,
-                          address: {
-                            ...prev.personalInfo.address,
-                            postalCode: e.target.value,
-                          },
-                        },
-                      }))}
-                      className="form-input"
-                      placeholder="SW1A 1AA"
-                    />
-                  </div>
+                      },
+                    }))}
+                    className="form-input"
+                    placeholder="London"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -327,104 +347,49 @@ export default function KYCPage() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
-                  <Label className="form-label">ID Document (Passport or Driver's License)</Label>
+                  <Label className="form-label">Driver's License</Label>
                   <div className="mt-2 flex justify-center rounded-lg border border-dashed border-border p-6">
                     <div className="text-center">
                       <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <div className="mt-4 flex text-sm leading-6 text-muted-foreground">
-                        <label className="relative cursor-pointer rounded-md font-semibold text-brand-primary">
-                          <span>Upload a file</span>
-                          <input
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleFileUpload('idDocument', file);
-                            }}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
+                      <div className="mt-4 space-y-2">
+                        <div className="flex text-sm leading-6 text-muted-foreground">
+                          <label className="relative cursor-pointer rounded-md font-semibold text-brand-primary">
+                            <span>Upload from Gallery</span>
+                            <input
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload('driversLicense', file);
+                              }}
+                            />
+                          </label>
+                        </div>
+                        <div className="text-sm text-muted-foreground">or</div>
+                        <div className="flex text-sm leading-6 text-muted-foreground">
+                          <label className="relative cursor-pointer rounded-md font-semibold text-brand-primary">
+                            <span>Take Photo</span>
+                            <input
+                              type="file"
+                              className="sr-only"
+                              accept="image/*"
+                              capture="environment"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) handleFileUpload('driversLicense', file);
+                              }}
+                            />
+                          </label>
+                        </div>
                       </div>
-                      <p className="text-xs leading-5 text-muted-foreground">PNG, JPG up to 10MB</p>
-                      {formData.documents.idDocument && (
+                      <p className="text-xs leading-5 text-muted-foreground mt-2">PNG, JPG up to 10MB</p>
+                      {formData.documents.driversLicense && (
                         <p className="mt-2 text-sm font-medium text-brand-success">
-                          ✓ {formData.documents.idDocument.name}
+                          ✓ {formData.documents.driversLicense.name}
                         </p>
                       )}
                     </div>
-                  </div>
-                </div>
-
-                <div>
-                  <Label className="form-label">Utility Bill (Last 3 months)</Label>
-                  <div className="mt-2 flex justify-center rounded-lg border border-dashed border-border p-6">
-                    <div className="text-center">
-                      <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                      <div className="mt-4 flex text-sm leading-6 text-muted-foreground">
-                        <label className="relative cursor-pointer rounded-md font-semibold text-brand-primary">
-                          <span>Upload a file</span>
-                          <input
-                            type="file"
-                            className="sr-only"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file) handleFileUpload('utilityBill', file);
-                            }}
-                          />
-                        </label>
-                        <p className="pl-1">or drag and drop</p>
-                      </div>
-                      <p className="text-xs leading-5 text-muted-foreground">PNG, JPG up to 10MB</p>
-                      {formData.documents.utilityBill && (
-                        <p className="mt-2 text-sm font-medium text-brand-success">
-                          ✓ {formData.documents.utilityBill.name}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        );
-
-      case 'verification':
-        return (
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Face Verification</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-muted-foreground">
-                  Take a selfie to verify your identity. Make sure your face is clearly visible and matches your ID document.
-                </p>
-                
-                <div className="flex justify-center rounded-lg border border-dashed border-border p-6">
-                  <div className="text-center">
-                    <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
-                    <div className="mt-4 flex text-sm leading-6 text-muted-foreground">
-                      <label className="relative cursor-pointer rounded-md font-semibold text-brand-primary">
-                        <span>Take Photo</span>
-                        <input
-                          type="file"
-                          className="sr-only"
-                          accept="image/*"
-                          capture="user"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleFileUpload('facePhoto', file);
-                          }}
-                        />
-                      </label>
-                    </div>
-                    {formData.documents.facePhoto && (
-                      <p className="mt-2 text-sm font-medium text-brand-success">
-                        ✓ Photo captured
-                      </p>
-                    )}
                   </div>
                 </div>
               </CardContent>
@@ -459,18 +424,8 @@ export default function KYCPage() {
                   <span className="text-brand-success">✓ Complete</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">ID Document:</span>
-                  <span className="text-brand-success">✓ Uploaded</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Utility Bill:</span>
-                  <span className="text-brand-success">✓ Uploaded</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Face Photo:</span>
-                  <span className={formData.documents.facePhoto ? "text-brand-success" : "text-muted-foreground"}>
-                    {formData.documents.facePhoto ? "✓ Captured" : "Optional"}
-                  </span>
+                  <span className="text-muted-foreground">Driver's License:</span>
+                  <span className="text-brand-success">✓ Complete</span>
                 </div>
               </CardContent>
             </Card>

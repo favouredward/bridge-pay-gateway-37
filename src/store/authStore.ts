@@ -26,10 +26,44 @@ export const useAuthStore = create<AuthState & AuthActions>()(
         set({ isLoading: true });
         try {
           // Set up auth state listener FIRST
-          supabase.auth.onAuthStateChange((event, session) => {
+          supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('Auth state changed:', event, session?.user?.id);
             
             if (session?.user) {
+              // Set up real-time subscription for user profile changes
+              const channel = supabase
+                .channel('profile-changes')
+                .on(
+                  'postgres_changes',
+                  {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'profiles',
+                    filter: `user_id=eq.${session.user.id}`
+                  },
+                  (payload) => {
+                    console.log('Profile updated:', payload);
+                    // Update the user state with new profile data
+                    const updatedProfile = payload.new;
+                    if (updatedProfile) {
+                      const currentState = get();
+                      if (currentState.user) {
+                        set({
+                          user: {
+                            ...currentState.user,
+                            kycStatus: updatedProfile.kyc_status,
+                            role: updatedProfile.role,
+                          }
+                        });
+                      }
+                    }
+                  }
+                )
+                .subscribe();
+
+              // Store channel for cleanup
+              (window as any).__supabaseRealtimeChannel = channel;
+
               // Defer profile fetching to avoid blocking the auth state change
               setTimeout(async () => {
                 const user = await authService.getCurrentUser();
@@ -50,6 +84,13 @@ export const useAuthStore = create<AuthState & AuthActions>()(
                 }
               }, 0);
             } else {
+              // Cleanup realtime subscription on signout
+              const channel = (window as any).__supabaseRealtimeChannel;
+              if (channel) {
+                supabase.removeChannel(channel);
+                delete (window as any).__supabaseRealtimeChannel;
+              }
+              
               set({
                 user: null,
                 token: null,
@@ -142,6 +183,12 @@ export const useAuthStore = create<AuthState & AuthActions>()(
 
       signOut: async () => {
         set({ isLoading: true });
+        // Cleanup realtime subscription
+        const channel = (window as any).__supabaseRealtimeChannel;
+        if (channel) {
+          supabase.removeChannel(channel);
+          delete (window as any).__supabaseRealtimeChannel;
+        }
         await authService.signOut();
         set({
           user: null,
