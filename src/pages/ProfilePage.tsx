@@ -23,7 +23,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ProfileEditDialog } from '@/components/profile/ProfileEditDialog';
 import { useState } from 'react';
-import { useUserData } from '@/hooks/useUserData';
+import { useOptimizedUserData } from '@/hooks/useOptimizedUserData';
 
 const getKYCStatusConfig = (status: string) => {
   switch (status) {
@@ -62,7 +62,7 @@ export default function ProfilePage() {
   const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const { stats } = useUserData();
+  const { stats } = useOptimizedUserData();
 
   if (!user) {
     navigate('/login');

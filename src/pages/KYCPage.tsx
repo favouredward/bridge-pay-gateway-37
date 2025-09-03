@@ -127,7 +127,27 @@ export default function KYCPage() {
             </div>
             <Button
               className="btn-primary"
-              onClick={() => setCurrentStep('personal')}
+              onClick={() => {
+                // Reset form data and KYC status to restart verification
+                setFormData({
+                  personalInfo: {
+                    firstName: user?.firstName || '',
+                    lastName: user?.lastName || '',
+                    dateOfBirth: '',
+                    nationality: 'British',
+                    phone: user?.phone || '',
+                    address: {
+                      street: '',
+                      city: '',
+                      country: 'United Kingdom',
+                    },
+                  },
+                  documents: {
+                    driversLicense: null,
+                  },
+                });
+                setCurrentStep('personal');
+              }}
             >
               Restart Verification
             </Button>

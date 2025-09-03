@@ -164,8 +164,16 @@ export default function AdminNavigation({ pendingCount }: AdminNavigationProps) 
             {/* Profile Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full flex-shrink-0">
-                  <User className="h-4 w-4" />
+                <Button variant="ghost" size="sm" className="h-8 w-8 rounded-full flex-shrink-0 p-0">
+                  {user?.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt="Profile" 
+                      className="h-8 w-8 rounded-full object-cover"
+                    />
+                  ) : (
+                    <User className="h-4 w-4" />
+                  )}
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48">

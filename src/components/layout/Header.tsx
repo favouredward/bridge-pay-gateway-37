@@ -59,9 +59,17 @@ export function Header({ title, showMenu = false, onMenuClick }: HeaderProps) {
           size="sm" 
           className="p-2 hover:bg-brand-primary/10 hover:text-brand-primary rounded-2xl"
         >
-          <div className="w-8 h-8 bg-gradient-to-r from-brand-secondary to-brand-accent rounded-xl flex items-center justify-center">
-            <User className="h-4 w-4 text-white" />
-          </div>
+          {user?.avatarUrl ? (
+            <img 
+              src={user.avatarUrl} 
+              alt="Profile" 
+              className="w-8 h-8 rounded-xl object-cover"
+            />
+          ) : (
+            <div className="w-8 h-8 bg-gradient-to-r from-brand-secondary to-brand-accent rounded-xl flex items-center justify-center">
+              <User className="h-4 w-4 text-white" />
+            </div>
+          )}
         </Button>
       </div>
     </header>

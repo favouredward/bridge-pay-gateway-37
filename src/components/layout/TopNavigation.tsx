@@ -76,9 +76,17 @@ export function TopNavigation() {
               size="sm" 
               className="p-2 hover:bg-brand-primary/10 hover:text-brand-primary rounded-xl"
             >
-              <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-r from-brand-secondary to-brand-accent rounded-lg flex items-center justify-center">
-                <User className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-              </div>
+              {user?.avatarUrl ? (
+                <img 
+                  src={user.avatarUrl} 
+                  alt="Profile" 
+                  className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg object-cover"
+                />
+              ) : (
+                <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-r from-brand-secondary to-brand-accent rounded-lg flex items-center justify-center">
+                  <User className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
+                </div>
+              )}
             </Button>
 
             {/* Mobile menu button */}
