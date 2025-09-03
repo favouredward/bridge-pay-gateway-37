@@ -5,6 +5,7 @@ export interface User {
   firstName: string;
   lastName: string;
   phone?: string;
+  avatarUrl?: string;
   kycStatus: 'pending' | 'under_review' | 'verified' | 'rejected';
   role: 'user' | 'admin';
   createdAt: string;

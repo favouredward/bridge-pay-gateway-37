@@ -17,8 +17,13 @@ import {
   CheckCircle,
   Clock,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  Edit
 } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ProfileEditDialog } from '@/components/profile/ProfileEditDialog';
+import { useState } from 'react';
+import { useUserData } from '@/hooks/useUserData';
 
 const getKYCStatusConfig = (status: string) => {
   switch (status) {
@@ -56,6 +61,8 @@ const getKYCStatusConfig = (status: string) => {
 export default function ProfilePage() {
   const { user, signOut } = useAuthStore();
   const navigate = useNavigate();
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const { stats } = useUserData();
 
   if (!user) {
     navigate('/login');
@@ -100,15 +107,28 @@ export default function ProfilePage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-start space-x-4">
-              <div className="flex-shrink-0">
-                <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center">
-                  <User className="h-8 w-8 text-brand-primary" />
-                </div>
+              <div className="flex-shrink-0 relative">
+                <Avatar className="w-16 h-16">
+                  <AvatarImage src={user.avatarUrl} alt="Profile" />
+                  <AvatarFallback className="bg-brand-primary/10 text-brand-primary text-lg font-semibold">
+                    {user.firstName?.[0]}{user.lastName?.[0]}
+                  </AvatarFallback>
+                </Avatar>
               </div>
               <div className="flex-1 min-w-0">
-                <h2 className="text-xl font-semibold text-foreground">
-                  {user.firstName} {user.lastName}
-                </h2>
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-foreground">
+                    {user.firstName} {user.lastName}
+                  </h2>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setEditDialogOpen(true)}
+                    className="text-brand-primary hover:text-brand-primary hover:bg-brand-primary/10"
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                </div>
                 <p className="text-sm text-muted-foreground mt-1">
                   Member since {new Date(user.createdAt).toLocaleDateString()}
                 </p>
@@ -169,7 +189,7 @@ export default function ProfilePage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <p className="text-2xl font-bold text-brand-primary">
-                0
+                {stats?.totalTransactions || 0}
               </p>
               <p className="text-sm text-muted-foreground">Transactions</p>
             </CardContent>
@@ -177,7 +197,7 @@ export default function ProfilePage() {
           <Card>
             <CardContent className="pt-6 text-center">
               <p className="text-2xl font-bold text-brand-success">
-                £0
+                £{stats?.totalSent || 0}
               </p>
               <p className="text-sm text-muted-foreground">Total Sent</p>
             </CardContent>
@@ -237,6 +257,11 @@ export default function ProfilePage() {
       </main>
 
       <BottomNavigation />
+      
+      <ProfileEditDialog 
+        open={editDialogOpen} 
+        onOpenChange={setEditDialogOpen} 
+      />
     </div>
   );
 }

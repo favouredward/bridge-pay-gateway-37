@@ -23,6 +23,7 @@ export interface UserTransaction {
 
 export interface UserStats {
   totalSent: number;
+  totalTransactions: number;
   completedTransactions: number;
   pendingTransactions: number;
   thisMonthTransactions: number;
@@ -35,6 +36,7 @@ export function useUserData() {
   const [transactions, setTransactions] = useState<UserTransaction[]>([]);
   const [stats, setStats] = useState<UserStats>({
     totalSent: 0,
+    totalTransactions: 0,
     completedTransactions: 0,
     pendingTransactions: 0,
     thisMonthTransactions: 0,
@@ -80,6 +82,7 @@ export function useUserData() {
 
       setStats({
         totalSent,
+        totalTransactions: userTransactions.length,
         completedTransactions: completedTx.length,
         pendingTransactions: pendingTx.length,
         thisMonthTransactions: thisMonthTx.length,

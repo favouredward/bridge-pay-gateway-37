@@ -11,11 +11,27 @@ interface AmountCalculatorProps {
   defaultGbpAmount?: number;
 }
 
-export function AmountCalculator({ onAmountChange, defaultGbpAmount = 0 }: AmountCalculatorProps) {
-  const [gbpAmount, setGbpAmount] = useState(defaultGbpAmount.toString());
+export function AmountCalculator({ onAmountChange, defaultGbpAmount = 10 }: AmountCalculatorProps) {
+  const [gbpAmount, setGbpAmount] = useState(defaultGbpAmount > 0 ? defaultGbpAmount.toString() : '10');
   const [usdtAmount, setUsdtAmount] = useState('0');
   const [isGbpFocused, setIsGbpFocused] = useState(true);
   const exchangeRate = getCurrentExchangeRate();
+
+  // Initialize with default amount on first load
+  useEffect(() => {
+    if (defaultGbpAmount > 0) {
+      const usdt = (defaultGbpAmount * exchangeRate).toFixed(2);
+      setUsdtAmount(usdt);
+      onAmountChange?.(defaultGbpAmount, parseFloat(usdt));
+    } else {
+      // Set default to £10 if no default provided
+      const defaultGbp = 10;
+      const usdt = (defaultGbp * exchangeRate).toFixed(2);
+      setGbpAmount(defaultGbp.toString());
+      setUsdtAmount(usdt);
+      onAmountChange?.(defaultGbp, parseFloat(usdt));
+    }
+  }, []);
 
   useEffect(() => {
     if (isGbpFocused) {
