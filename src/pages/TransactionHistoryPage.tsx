@@ -7,14 +7,13 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useAuthStore } from '@/store/authStore';
-import { mockTransactions } from '@/data/mockData';
+import { useOptimizedUserData } from '@/hooks/useOptimizedUserData';
 import { Transaction, TransactionFilters } from '@/types';
 import { History, Search, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function TransactionHistoryPage() {
-  const { user } = useAuthStore();
+  const { transactions } = useOptimizedUserData();
   const navigate = useNavigate();
   const [filters, setFilters] = useState<TransactionFilters>({
     status: 'all',
@@ -22,8 +21,8 @@ export default function TransactionHistoryPage() {
   });
   const [showFilters, setShowFilters] = useState(false);
 
-  // Get user's transactions
-  const userTransactions = mockTransactions.filter(tx => tx.userId === user?.id);
+  // Get user's transactions from Supabase
+  const userTransactions = transactions || [];
 
   // Apply filters
   const filteredTransactions = userTransactions.filter(transaction => {
