@@ -68,7 +68,6 @@ export default function SendMoneyPage() {
               Please complete your KYC verification to start sending money.
             </p>
             <Button
-              className="btn-primary"
               onClick={() => navigate('/kyc')}
             >
               Complete KYC
@@ -474,7 +473,7 @@ export default function SendMoneyPage() {
           )}
           <Button 
             onClick={handleNext} 
-            className="btn-primary flex-1"
+            className="flex-1"
             disabled={
               (currentStep === 'amount' && formData.gbpAmount === 0) ||
               (currentStep === 'recipient' && !formData.walletAddress)
