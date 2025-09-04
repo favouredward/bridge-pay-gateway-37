@@ -35,9 +35,9 @@ export default function TransactionHistoryPage() {
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
       return (
-        transaction.paymentReference.toLowerCase().includes(searchLower) ||
-        transaction.walletAddress.toLowerCase().includes(searchLower) ||
-        transaction.transactionHash?.toLowerCase().includes(searchLower)
+        transaction.payment_reference.toLowerCase().includes(searchLower) ||
+        transaction.wallet_address.toLowerCase().includes(searchLower) ||
+        transaction.transaction_hash?.toLowerCase().includes(searchLower)
       );
     }
 
@@ -164,7 +164,7 @@ export default function TransactionHistoryPage() {
             </div>
             <div className="card-premium p-4 text-center">
               <p className="text-lg font-bold text-brand-primary">
-                £{userTransactions.reduce((sum, tx) => sum + tx.gbpAmount, 0).toLocaleString()}
+                £{userTransactions.reduce((sum, tx) => sum + tx.gbp_amount, 0).toLocaleString()}
               </p>
               <p className="text-sm text-muted-foreground">Total Sent</p>
             </div>

@@ -85,6 +85,8 @@ export type Database = {
           last_name: string
           phone: string | null
           role: string
+          terms_accepted: boolean | null
+          terms_accepted_at: string | null
           updated_at: string
           user_id: string
         }
@@ -98,6 +100,8 @@ export type Database = {
           last_name: string
           phone?: string | null
           role?: string
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -111,6 +115,8 @@ export type Database = {
           last_name?: string
           phone?: string | null
           role?: string
+          terms_accepted?: boolean | null
+          terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
         }

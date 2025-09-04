@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TopNavigation } from '@/components/layout/TopNavigation';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
@@ -14,19 +14,45 @@ import { ArrowLeft, Copy, Clock, CheckCircle } from 'lucide-react';
 import { generatePaymentReference, getCurrentExchangeRate } from '@/data/mockData';
 import { useAuthStore } from '@/store/authStore';
 import { supabase } from '@/integrations/supabase/client';
+import { TermsDialog } from '@/components/ui/terms-dialog';
+import { useAuth } from '@/hooks/useAuth';
 
 type Step = 'amount' | 'recipient' | 'payment' | 'confirmation';
 
 export default function SendMoneyPage() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
+  const { user } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
   const [currentStep, setCurrentStep] = useState<Step>('amount');
+  const [showTermsDialog, setShowTermsDialog] = useState(false);
   const [formData, setFormData] = useState({
     gbpAmount: 0,
     usdtAmount: 0,
     walletAddress: '',
     paymentReference: '',
   });
+
+  // Fetch user profile
+  useEffect(() => {
+    if (user?.id) {
+      const fetchProfile = async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('terms_accepted')
+          .eq('user_id', user.id)
+          .single();
+        setProfile(data);
+      };
+      fetchProfile();
+    }
+  }, [user?.id]);
+
+  // Check if user needs to accept terms for their first transaction
+  useEffect(() => {
+    if (profile && !profile.terms_accepted && currentStep === 'confirmation') {
+      setShowTermsDialog(true);
+    }
+  }, [profile, currentStep]);
 
   // Check if user is KYC verified
   if (user?.kycStatus !== 'verified') {
@@ -121,7 +147,47 @@ export default function SendMoneyPage() {
     toast.success(`${label} copied to clipboard`);
   };
 
+  const handleAcceptTerms = async () => {
+    try {
+      // Update user profile to mark terms as accepted
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          terms_accepted: true, 
+          terms_accepted_at: new Date().toISOString() 
+        })
+        .eq('user_id', user?.id);
+
+      if (error) {
+        console.error('Error updating terms acceptance:', error);
+        toast.error('Failed to accept terms. Please try again.');
+        return;
+      }
+
+      setShowTermsDialog(false);
+      // Refresh profile data
+      if (user?.id) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('terms_accepted')
+          .eq('user_id', user.id)
+          .single();
+        setProfile(data);
+      }
+      handleSubmitTransaction();
+    } catch (err) {
+      console.error('Unexpected error accepting terms:', err);
+      toast.error('Failed to accept terms. Please try again.');
+    }
+  };
+
   const handleSubmitTransaction = async () => {
+    // Check if terms need to be accepted first
+    if (profile && !profile.terms_accepted) {
+      setShowTermsDialog(true);
+      return;
+    }
+
     try {
       const { data, error } = await supabase
         .from('transactions')
@@ -420,6 +486,12 @@ export default function SendMoneyPage() {
       </main>
 
       <BottomNavigation />
+
+      <TermsDialog
+        open={showTermsDialog}
+        onAccept={handleAcceptTerms}
+        onCancel={() => setShowTermsDialog(false)}
+      />
     </div>
   );
 }
