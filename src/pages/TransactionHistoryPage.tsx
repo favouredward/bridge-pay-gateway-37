@@ -7,8 +7,8 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useOptimizedUserData } from '@/hooks/useOptimizedUserData';
-import { Transaction, TransactionFilters } from '@/types';
+import { useOptimizedUserData, UserTransaction } from '@/hooks/useOptimizedUserData';
+import { TransactionFilters } from '@/types';
 import { History, Search, Filter } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
