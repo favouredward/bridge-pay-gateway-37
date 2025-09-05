@@ -474,10 +474,6 @@ export default function SendMoneyPage() {
           <Button 
             onClick={handleNext} 
             className="flex-1"
-            disabled={
-              (currentStep === 'amount' && formData.gbpAmount === 0) ||
-              (currentStep === 'recipient' && !formData.walletAddress)
-            }
           >
             {currentStep === 'confirmation' ? 'Submit Transaction' : 'Next'}
           </Button>

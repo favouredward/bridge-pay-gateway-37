@@ -11,8 +11,8 @@ interface AmountCalculatorProps {
   defaultGbpAmount?: number;
 }
 
-export function AmountCalculator({ onAmountChange, defaultGbpAmount = 10 }: AmountCalculatorProps) {
-  const [gbpAmount, setGbpAmount] = useState(defaultGbpAmount > 0 ? defaultGbpAmount.toString() : '10');
+export function AmountCalculator({ onAmountChange, defaultGbpAmount = 0 }: AmountCalculatorProps) {
+  const [gbpAmount, setGbpAmount] = useState(defaultGbpAmount.toString());
   const [usdtAmount, setUsdtAmount] = useState('0');
   const [isGbpFocused, setIsGbpFocused] = useState(true);
   const exchangeRate = getCurrentExchangeRate();
@@ -24,12 +24,10 @@ export function AmountCalculator({ onAmountChange, defaultGbpAmount = 10 }: Amou
       setUsdtAmount(usdt);
       onAmountChange?.(defaultGbpAmount, parseFloat(usdt));
     } else {
-      // Set default to £10 if no default provided
-      const defaultGbp = 10;
-      const usdt = (defaultGbp * exchangeRate).toFixed(2);
-      setGbpAmount(defaultGbp.toString());
-      setUsdtAmount(usdt);
-      onAmountChange?.(defaultGbp, parseFloat(usdt));
+      // Start with 0 amounts
+      setGbpAmount('0');
+      setUsdtAmount('0');
+      onAmountChange?.(0, 0);
     }
   }, []);
 
