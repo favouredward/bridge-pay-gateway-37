@@ -464,7 +464,7 @@ export default function SendMoneyPage() {
         </div>
 
         {/* Navigation */}
-        <div className="flex gap-3 pt-4">
+        <div className="flex gap-3 pt-6">
           {currentStepIndex > 0 && (
             <Button variant="outline" onClick={handleBack} className="flex-1">
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -473,9 +473,11 @@ export default function SendMoneyPage() {
           )}
           <Button 
             onClick={handleNext} 
-            className="flex-1"
+            className="flex-1 h-12 text-lg font-semibold"
+            size="lg"
           >
-            {currentStep === 'confirmation' ? 'Submit Transaction' : 'Next'}
+            {currentStep === 'amount' ? 'Send Money' : 
+             currentStep === 'confirmation' ? 'Submit Transaction' : 'Next'}
           </Button>
         </div>
       </main>
