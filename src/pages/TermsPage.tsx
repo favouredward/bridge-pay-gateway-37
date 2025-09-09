@@ -4,9 +4,20 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 export default function TermsPage() {
   const navigate = useNavigate();
+  const [termsAccepted, setTermsAccepted] = useState(false);
+
+  const handleAcceptTerms = () => {
+    setTermsAccepted(true);
+    navigate('/send');
+  };
+
+  const handleRejectTerms = () => {
+    navigate(-1);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,18 +141,18 @@ export default function TermsPage() {
         </Card>
 
         {/* Accept/Reject Buttons */}
-        <div className="flex gap-4 justify-center pt-6">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6 pb-8">
           <Button 
             variant="outline"
-            onClick={() => navigate(-1)}
-            className="w-full h-12 text-lg font-semibold"
+            onClick={handleRejectTerms}
+            className="w-full sm:w-48 h-12 text-lg font-semibold border-2 hover:bg-muted/50"
             size="lg"
           >
-            Reject
+            Reject Terms
           </Button>
           <Button 
-            onClick={() => navigate('/send')}
-            className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90"
+            onClick={handleAcceptTerms}
+            className="w-full sm:w-48 h-12 text-lg font-semibold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg transform hover:scale-[1.02] transition-all duration-200"
             size="lg"
           >
             Accept & Continue
