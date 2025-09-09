@@ -28,6 +28,10 @@ export function TermsDialog({ open, onAccept, onCancel }: TermsDialogProps) {
     }
   };
 
+  const handleReject = () => {
+    onCancel();
+  };
+
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
       <DialogContent className="max-w-2xl max-h-[80vh]">
@@ -105,14 +109,20 @@ export function TermsDialog({ open, onAccept, onCancel }: TermsDialogProps) {
           </label>
         </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={onCancel}>
-            Cancel
+        <DialogFooter className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+          <Button 
+            variant="outline" 
+            onClick={handleReject}
+            className="w-full sm:w-auto order-2 sm:order-1 h-11 text-base font-semibold border-2 hover:bg-muted/50 transition-all duration-200"
+            size="lg"
+          >
+            Reject Terms
           </Button>
           <Button 
             onClick={handleAccept} 
             disabled={!accepted}
-            className="btn-primary"
+            className="w-full sm:w-auto order-1 sm:order-2 h-11 text-base font-semibold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg transform hover:scale-[1.02] transition-all duration-200 disabled:transform-none disabled:hover:scale-100"
+            size="lg"
           >
             Accept & Continue
           </Button>
