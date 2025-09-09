@@ -295,6 +295,17 @@ export default function SendMoneyPage() {
                 </div>
               </div>
             </div>
+
+            {/* Continue Button */}
+            <div className="flex justify-center pt-6">
+              <Button 
+                onClick={handleNext} 
+                className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
+                size="lg"
+              >
+                Continue to Payment →
+              </Button>
+            </div>
           </div>
         );
 
@@ -391,6 +402,17 @@ export default function SendMoneyPage() {
                 our end. Your USDT will be sent once payment is received.
               </p>
             </div>
+
+            {/* I've Made Payment Button */}
+            <div className="flex justify-center pt-6">
+              <Button 
+                onClick={handleNext} 
+                className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
+                size="lg"
+              >
+                I've Made Payment →
+              </Button>
+            </div>
           </div>
         );
 
@@ -440,6 +462,17 @@ export default function SendMoneyPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Submit Transaction Button */}
+            <div className="flex justify-center pt-6">
+              <Button 
+                onClick={handleNext} 
+                className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
+                size="lg"
+              >
+                Submit Transaction →
+              </Button>
+            </div>
           </div>
         );
 
