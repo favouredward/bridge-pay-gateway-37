@@ -241,6 +241,17 @@ export default function SendMoneyPage() {
                 Fee: 2.5% + £1 network fee
               </p>
             </div>
+
+            {/* Send Money Button */}
+            <div className="flex justify-center pt-6">
+              <Button 
+                onClick={handleNext} 
+                className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
+                size="lg"
+              >
+                Send Money →
+              </Button>
+            </div>
           </div>
         );
 
