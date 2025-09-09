@@ -296,11 +296,19 @@ export default function SendMoneyPage() {
               </div>
             </div>
 
-            {/* Continue Button */}
-            <div className="flex justify-center pt-6">
+            {/* Navigation Buttons */}
+            <div className="flex gap-4 pt-6">
+              <Button 
+                variant="outline"
+                onClick={() => navigate(-1)}
+                className="w-32 h-14 text-lg font-semibold"
+                size="lg"
+              >
+                ← Back
+              </Button>
               <Button 
                 onClick={handleNext} 
-                className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
+                className="flex-1 h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
                 size="lg"
               >
                 Continue to Payment →
@@ -403,11 +411,19 @@ export default function SendMoneyPage() {
               </p>
             </div>
 
-            {/* I've Made Payment Button */}
-            <div className="flex justify-center pt-6">
+            {/* Navigation Buttons */}
+            <div className="flex gap-4 pt-6">
+              <Button 
+                variant="outline"
+                onClick={handleBack}
+                className="w-32 h-14 text-lg font-semibold"
+                size="lg"
+              >
+                ← Back
+              </Button>
               <Button 
                 onClick={handleNext} 
-                className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
+                className="flex-1 h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
                 size="lg"
               >
                 I've Made Payment →
@@ -463,11 +479,19 @@ export default function SendMoneyPage() {
               </CardContent>
             </Card>
 
-            {/* Submit Transaction Button */}
-            <div className="flex justify-center pt-6">
+            {/* Navigation Buttons */}
+            <div className="flex gap-4 pt-6">
+              <Button 
+                variant="outline"
+                onClick={handleBack}
+                className="w-32 h-14 text-lg font-semibold"
+                size="lg"
+              >
+                ← Back
+              </Button>
               <Button 
                 onClick={handleNext} 
-                className="w-full h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
+                className="flex-1 h-14 text-xl font-bold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90 shadow-lg"
                 size="lg"
               >
                 Submit Transaction →

@@ -128,6 +128,25 @@ export default function TermsPage() {
             </section>
           </CardContent>
         </Card>
+
+        {/* Accept/Reject Buttons */}
+        <div className="flex gap-4 justify-center pt-6">
+          <Button 
+            variant="outline"
+            onClick={() => navigate(-1)}
+            className="w-full h-12 text-lg font-semibold"
+            size="lg"
+          >
+            Reject
+          </Button>
+          <Button 
+            onClick={() => navigate('/send')}
+            className="w-full h-12 text-lg font-semibold bg-gradient-to-r from-primary to-primary-foreground hover:from-primary/90 hover:to-primary-foreground/90"
+            size="lg"
+          >
+            Accept & Continue
+          </Button>
+        </div>
       </main>
 
       <BottomNavigation />
