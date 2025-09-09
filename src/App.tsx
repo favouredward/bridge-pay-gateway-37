@@ -18,7 +18,7 @@ import TransactionDetailsPage from "./pages/TransactionDetailsPage";
 import KYCPage from "./pages/KYCPage";
 import ProfilePage from "./pages/ProfilePage";
 import ReceiptPage from "./pages/ReceiptPage";
-import TermsPage from "./pages/TermsPage";
+
 
 // Admin Pages
 import AdminLoginPage from "./pages/admin/AdminLoginPage";
@@ -104,11 +104,6 @@ const App = () => {
         <Route path="/receipt/:id" element={
           <ProtectedRoute>
             <ReceiptPage />
-          </ProtectedRoute>
-        } />
-        <Route path="/terms" element={
-          <ProtectedRoute>
-            <TermsPage />
           </ProtectedRoute>
         } />
 
