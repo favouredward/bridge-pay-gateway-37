@@ -126,7 +126,7 @@ export default function TransactionHistoryPage() {
                 <TransactionCard
                   key={transaction.id}
                   transaction={transaction}
-                  onClick={() => navigate(`/transaction/${transaction.id}`)}
+                  onClick={() => navigate(`/transactions/${transaction.id}`)}
                 />
               ))}
             </div>

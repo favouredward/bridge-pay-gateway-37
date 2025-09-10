@@ -86,7 +86,7 @@ const App = () => {
             <TransactionHistoryPage />
           </ProtectedRoute>
         } />
-        <Route path="/transaction/:id" element={
+        <Route path="/transactions/:id" element={
           <ProtectedRoute>
             <TransactionDetailsPage />
           </ProtectedRoute>

@@ -294,7 +294,7 @@ export default function DashboardPage() {
                 >
                   <TransactionCard
                     transaction={transaction}
-                    onClick={() => navigate(`/transaction/${transaction.id}`)}
+                    onClick={() => navigate(`/transactions/${transaction.id}`)}
                   />
                 </div>
               ))}

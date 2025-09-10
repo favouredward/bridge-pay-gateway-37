@@ -1,20 +1,64 @@
 
 import { useParams, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
 import { Header } from '@/components/layout/Header';
 import { BottomNavigation } from '@/components/layout/BottomNavigation';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { mockTransactions } from '@/data/mockData';
 import { Copy, ExternalLink, Download, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function TransactionDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const [transaction, setTransaction] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const transaction = mockTransactions.find(tx => tx.id === id);
+  useEffect(() => {
+    const fetchTransaction = async () => {
+      if (!id || !user?.id) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('id', id)
+          .eq('user_id', user.id) // Ensure user can only see their own transaction
+          .single();
+
+        if (error) {
+          console.error('Error fetching transaction:', error);
+          setTransaction(null);
+        } else {
+          setTransaction(data);
+        }
+      } catch (err) {
+        console.error('Error:', err);
+        setTransaction(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransaction();
+  }, [id, user?.id]);
+
+  if (loading) {
+    return (
+      <div className="page-container mobile-safe-area">
+        <Header title="Transaction Details" />
+        <main className="container-padding py-6">
+          <div className="text-center">Loading...</div>
+        </main>
+        <BottomNavigation />
+      </div>
+    );
+  }
 
   if (!transaction) {
     return (
@@ -91,23 +135,23 @@ export default function TransactionDetailsPage() {
               <div>
                 <p className="text-sm text-muted-foreground">You sent</p>
                 <p className="text-lg font-semibold text-foreground">
-                  {formatAmount(transaction.gbpAmount)}
+                  {formatAmount(transaction.gbp_amount)}
                 </p>
               </div>
               <div>
                 <p className="text-sm text-muted-foreground">Recipient gets</p>
                 <p className="text-lg font-semibold text-foreground">
-                  {transaction.usdtAmount} USDT
+                  {transaction.usdt_amount} USDT
                 </p>
               </div>
             </div>
             
             <div className="pt-2 border-t border-border">
               <p className="text-sm text-muted-foreground">
-                Exchange rate: 1 GBP = {transaction.exchangeRate} USDT
+                Exchange rate: 1 GBP = {transaction.exchange_rate} USDT
               </p>
               <p className="text-xs text-muted-foreground">
-                Created {formatDistanceToNow(new Date(transaction.createdAt), { addSuffix: true })}
+                Created {formatDistanceToNow(new Date(transaction.created_at), { addSuffix: true })}
               </p>
             </div>
           </CardContent>
@@ -152,11 +196,11 @@ export default function TransactionDetailsPage() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-muted-foreground">Reference:</span>
                 <div className="flex items-center gap-2">
-                  <span className="font-mono text-sm">{transaction.paymentReference}</span>
+                  <span className="font-mono text-sm">{transaction.payment_reference}</span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyToClipboard(transaction.paymentReference, 'Reference')}
+                    onClick={() => copyToClipboard(transaction.payment_reference, 'Reference')}
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
@@ -167,29 +211,29 @@ export default function TransactionDetailsPage() {
                 <span className="text-sm text-muted-foreground">Wallet Address:</span>
                 <div className="flex items-center gap-2">
                   <span className="font-mono text-sm">
-                    {`${transaction.walletAddress.slice(0, 6)}...${transaction.walletAddress.slice(-4)}`}
+                    {`${transaction.wallet_address.slice(0, 6)}...${transaction.wallet_address.slice(-4)}`}
                   </span>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => copyToClipboard(transaction.walletAddress, 'Wallet address')}
+                    onClick={() => copyToClipboard(transaction.wallet_address, 'Wallet address')}
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
                 </div>
               </div>
 
-              {transaction.transactionHash && (
+              {transaction.transaction_hash && (
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Transaction Hash:</span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm">
-                      {`${transaction.transactionHash.slice(0, 6)}...${transaction.transactionHash.slice(-4)}`}
+                      {`${transaction.transaction_hash.slice(0, 6)}...${transaction.transaction_hash.slice(-4)}`}
                     </span>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => window.open(`https://etherscan.io/tx/${transaction.transactionHash}`, '_blank')}
+                      onClick={() => window.open(`https://etherscan.io/tx/${transaction.transaction_hash}`, '_blank')}
                     >
                       <ExternalLink className="h-3 w-3" />
                     </Button>
@@ -208,15 +252,15 @@ export default function TransactionDetailsPage() {
           <CardContent className="space-y-3">
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">BridgePay Fee:</span>
-              <span className="text-sm font-medium">£{transaction.fees.bridgePayFee}</span>
+              <span className="text-sm font-medium">£{transaction.bridge_pay_fee}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-sm text-muted-foreground">Network Fee:</span>
-              <span className="text-sm font-medium">£{transaction.fees.networkFee}</span>
+              <span className="text-sm font-medium">£{transaction.network_fee}</span>
             </div>
             <div className="flex justify-between pt-2 border-t border-border">
               <span className="font-medium">Total Fees:</span>
-              <span className="font-medium">£{transaction.fees.totalFees}</span>
+              <span className="font-medium">£{transaction.total_fees}</span>
             </div>
           </CardContent>
         </Card>
@@ -238,14 +282,14 @@ export default function TransactionDetailsPage() {
           )}
         </div>
 
-        {transaction.adminNotes && (
+        {transaction.admin_notes && (
           <Card>
             <CardHeader>
               <CardTitle>Admin Notes</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground">
-                {transaction.adminNotes}
+                {transaction.admin_notes}
               </p>
             </CardContent>
           </Card>
